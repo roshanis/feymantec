@@ -16,11 +16,6 @@ if (!Core) {
 const { safeTrim, wordCount, isLikelyNSFW, randomId, escapeHtml, buildPreviewCard, encodeJsonToBase64Url, toSharePayload } =
   Core;
 
-const Supa = globalThis.FeymantecSupabase;
-if (!Supa) {
-  throw new Error("Missing FeymantecSupabase. Load lib/feymantec-supabase.js before app.js.");
-}
-
 function getParams() {
   const u = new URL(window.location.href);
   const params = Object.fromEntries(u.searchParams.entries());
@@ -194,11 +189,6 @@ function renderCard(card) {
 
   qs("#cardBody").innerHTML = blocks.join("");
   qs("#cardFoot").hidden = false;
-
-  // Reveal the card output container (hidden on dashboard until first generation)
-  const demoOut = qs("#demoOut");
-  if (demoOut) demoOut.classList.remove("is-hidden");
-}
 
 function setConceptSuggestions(setConcept) {
   const el = qs("#conceptSuggest");
@@ -776,16 +766,23 @@ function initWaitlist() {
         } catch {
           // Private browsing or storage full - continue anyway
         }
+      }
+      if (!ok) throw new Error("Could not generate a unique referral code. Try again.");
+
+      try {
+        localStorage.setItem("feym_waitlist_ref", code);
+        localStorage.setItem("feym_waitlist_email", email);
+      } catch {
+        // Private browsing or storage full - continue anyway
+      }
 
         const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(refCode)}`;
         await showOkWithProgress({ link, accessToken, refCode });
         form.hidden = true;
       }
     } catch (err) {
-      const msg = err?.message || "Could not continue. Try again.";
-
-      // If their email is already on the waitlist, show the local link if available.
-      if (/already on the waitlist/i.test(msg)) {
+      const msg = err?.message || "Could not add you. Try again.";
+      if (msg.includes("already on the waitlist")) {
         let storedEmail = "";
         let storedCode = "";
         try {
@@ -817,6 +814,55 @@ function initWaitlist() {
   });
 
   setStep(form.getAttribute("data-step") || "email");
+}
+
+function initMobileNav() {
+  const toggle = qs("#navToggle");
+  const mobileNav = qs("#navMobile");
+  if (!toggle || !mobileNav) return;
+
+  function closeNav() {
+    toggle.setAttribute("aria-expanded", "false");
+    mobileNav.classList.remove("is-open");
+  }
+
+  function openNav() {
+    toggle.setAttribute("aria-expanded", "true");
+    mobileNav.classList.add("is-open");
+  }
+
+  toggle.addEventListener("click", () => {
+    const isOpen = toggle.getAttribute("aria-expanded") === "true";
+    if (isOpen) {
+      closeNav();
+    } else {
+      openNav();
+    }
+  });
+
+  // Close nav when clicking a link
+  qsa(".nav-mobile__link").forEach((link) => {
+    link.addEventListener("click", closeNav);
+  });
+
+  // Close nav on escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && mobileNav.classList.contains("is-open")) {
+      closeNav();
+      toggle.focus();
+    }
+  });
+
+  // Close nav when clicking outside
+  document.addEventListener("click", (e) => {
+    if (
+      mobileNav.classList.contains("is-open") &&
+      !mobileNav.contains(e.target) &&
+      !toggle.contains(e.target)
+    ) {
+      closeNav();
+    }
+  });
 }
 
 function initMobileNav() {

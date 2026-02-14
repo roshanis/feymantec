@@ -1,99 +1,95 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light" />
+    <title>Feymantec | Learn Any Concept in 5 Minutes</title>
+    <meta
+      name="description"
+      content="A 5-minute Feynman coach: explain simply, find your gaps, and lock it in. Join the TestFlight waitlist."
+    />
 
-  <title>Feymantec | Learn Any Concept in 5 Minutes</title>
-  <meta name="description"
-    content="A guided Feynman coach: explain simply, find your gaps, and lock it in. Sign up free." />
+    <meta property="og:title" content="Feymantec" />
+    <meta
+      property="og:description"
+      content="Learn any concept in 5 minutes using the Feynman technique. Explain it. Find the gap. Teach it back."
+    />
+    <meta property="og:type" content="website" />
 
-  <meta property="og:title" content="Feymantec" />
-  <meta property="og:description"
-    content="Learn any concept by teaching it. Explain it. Find the gap. Teach it back." />
-  <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
 
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 
+    <link rel="stylesheet" href="styles.css" />
+    <script src="lib/feymantec-core.js" defer></script>
+    <script src="config.js"></script>
+    <script src="app.js" defer></script>
+  </head>
 
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
 
-  <link rel="stylesheet" href="styles.css" />
-  <script src="lib/feymantec-core.js" defer></script>
-  <script src="lib/feymantec-supabase.js" defer></script>
-  <script src="lib/feymantec-ai.js" defer></script>
-  <script src="config.js"></script>
-  <script src="app.js" defer></script>
-</head>
+    <header class="topbar" data-elevate="off">
+      <div class="shell topbar__inner">
+        <a class="brand" href="#top" aria-label="Feymantec home">
+          <span class="brand__mark" aria-hidden="true"></span>
+          <span class="brand__name">Feymantec</span>
+          <span class="brand__tag">5-minute clarity</span>
+        </a>
 
-<body>
-  <a class="skip" href="#main">Skip to content</a>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          aria-controls="navMobile"
+          id="navToggle"
+        >
+          <span class="nav-toggle__icon" aria-hidden="true">
+            <span class="nav-toggle__line"></span>
+            <span class="nav-toggle__line"></span>
+            <span class="nav-toggle__line"></span>
+          </span>
+        </button>
 
-  <header class="topbar" data-elevate="off">
-    <div class="shell topbar__inner">
-      <a class="brand" href="#top" aria-label="Feymantec home">
-        <span class="brand__mark" aria-hidden="true"></span>
-        <span class="brand__name">Feymantec</span>
-        <span class="brand__tag">Feynman clarity</span>
-      </a>
+        <nav class="nav">
+          <a class="nav__link" href="#loop">How it works</a>
+          <a class="nav__link" href="#demo">Demo</a>
+          <a class="nav__link" href="#pricing">Pricing</a>
+          <a class="nav__link" href="#community">Community</a>
+          <a class="nav__link" href="#waitlist">Waitlist</a>
+        </nav>
 
-      <button class="nav-toggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false"
-        aria-controls="navMobile" id="navToggle">
-        <span class="nav-toggle__icon" aria-hidden="true">
-          <span class="nav-toggle__line"></span>
-          <span class="nav-toggle__line"></span>
-          <span class="nav-toggle__line"></span>
-        </span>
-      </button>
-
-      <nav class="nav">
-        <a class="nav__link" href="#loop">How it works</a>
-        <a class="nav__link" href="#demo">Demo</a>
-        <a class="nav__link" href="#pricing">Pricing</a>
-        <a class="nav__link" href="/signup.html">Sign up</a>
-        <a class="nav__link" href="/login.html">Log in</a>
-      </nav>
-
-      <div class="topbar__cta">
-        <a class="btn btn--ghost" href="/login.html">Log in</a>
-        <a class="btn btn--solid" href="/signup.html">Sign up</a>
-      </div>
-    </div>
-  </header>
-
-  <nav class="nav-mobile" id="navMobile" aria-label="Mobile navigation">
-    <a class="nav-mobile__link" href="#loop">How it works</a>
-    <a class="nav-mobile__link" href="#demo">Demo</a>
-    <a class="nav-mobile__link" href="#pricing">Pricing</a>
-    <a class="nav-mobile__link" href="/signup.html">Sign up</a>
-    <a class="nav-mobile__link" href="/login.html">Log in</a>
-  </nav>
-
-  <main id="main">
-    <section id="top" class="hero">
-      <div class="hero__bg" aria-hidden="true"></div>
-      <div class="shell hero__inner">
-        <div class="hero__copy">
-          <h1 class="hero__title reveal" style="--d: 0ms">
-            Learn anything by <span class="hl">teaching it</span>.
-            <span class="hero__title2">Explain it. Find the gap. Teach it back.</span>
-          </h1>
-
-          <p class="hero__sub reveal" style="--d: 80ms">
-            Feymantec is a guided Feynman coach. Pick a concept, explain it simply,
-            find the gaps, and lock it in.
-          </p>
-
-          <div class="hero__actions reveal" style="--d: 160ms">
-            <a class="btn btn--solid btn--big" href="/signup.html">
-              Sign up free
-            </a>
-            <a class="btn btn--ghost btn--big" href="#demo">
-              Try the Demo
-            </a>
-          </div>
+        <div class="topbar__cta">
+          <a class="btn btn--ghost" href="#demo">Try demo</a>
+          <a class="btn btn--solid" href="#waitlist">Join TestFlight</a>
         </div>
+      </div>
+    </header>
+
+    <nav class="nav-mobile" id="navMobile" aria-label="Mobile navigation">
+      <a class="nav-mobile__link" href="#loop">How it works</a>
+      <a class="nav-mobile__link" href="#demo">Demo</a>
+      <a class="nav-mobile__link" href="#pricing">Pricing</a>
+      <a class="nav-mobile__link" href="#community">Community</a>
+      <a class="nav-mobile__link" href="#waitlist">Waitlist</a>
+    </nav>
+
+    <main id="main">
+      <section id="top" class="hero">
+        <div class="hero__bg" aria-hidden="true"></div>
+        <div class="shell hero__inner">
+          <div class="hero__copy">
+            <p class="kicker reveal" style="--d: 0ms">
+              The Feynman technique, compressed into a timer you can actually finish.
+            </p>
 
 
       </div>
@@ -172,18 +168,19 @@
               <div class="suggest" id="conceptSuggest" aria-label="Suggested concepts"></div>
             </div>
 
-            <div class="field">
-              <label class="label" for="explain">Your explanation (v1)</label>
-              <textarea class="textarea" id="explain" name="explain"
-                placeholder="Talk it out. If you had to teach a smart 12-year-old, what would you say?" rows="8"
-                aria-describedby="explainMeta"></textarea>
-              <div class="metaRow">
-                <p class="metaRow__hint" id="explainMeta" aria-live="polite">0 words</p>
-                <button class="btn btn--solid" type="button" id="genCard">Generate card</button>
-              </div>
-              <p class="metaRow__hint">
-                Tip: write 2-3 plain-language sentences so the preview can find your gaps.
-              </p>
+            <div class="hero__proof reveal" style="--d: 300ms">
+              <span class="proof-badge">
+                <span class="proof-badge__icon" aria-hidden="true"></span>
+                <span class="proof-badge__text">Join <strong id="waitlistCount">2,400+</strong> learners on the waitlist</span>
+              </span>
+            </div>
+
+            <div class="hero__chips reveal" style="--d: 320ms">
+              <span class="chip">Voice-first</span>
+              <span class="chip">Clarity score</span>
+              <span class="chip">Streaks</span>
+              <span class="chip">Spaced review</span>
+              <span class="chip">Public cards</span>
             </div>
 
           </div>
@@ -226,17 +223,53 @@
 
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="pricing" class="section">
-      <div class="shell">
-        <div class="section__head">
-          <h2 class="h2">Freemium, but fair</h2>
-          <p class="lead">
-            You can build the habit for free. Power users go unlimited.
-          </p>
-        </div>
+      <section id="demo" class="section section--demo">
+        <div class="shell">
+          <div class="section__head">
+            <h2 class="h2">Try the Card Generator</h2>
+            <p class="lead">
+              This is a local preview for the landing page. The iOS app will run a real AI coach and
+              save cards to your profile.
+            </p>
+          </div>
+
+          <div class="demo">
+            <div class="demo__input">
+              <div class="field">
+                <label class="label" for="concept">Concept</label>
+                <div class="field__row">
+                  <input
+                    class="input"
+                    id="concept"
+                    name="concept"
+                    autocomplete="off"
+                    placeholder="e.g. Bayes’ theorem"
+                    maxlength="80"
+                  />
+                  <button class="btn btn--ghost" type="button" id="fillDaily">
+                    Use Daily 5
+                  </button>
+                </div>
+                <div class="suggest" id="conceptSuggest" aria-label="Suggested concepts"></div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="explain">Your explanation (v1)</label>
+                <textarea
+                  class="textarea"
+                  id="explain"
+                  name="explain"
+                  placeholder="Talk it out. If you had to teach a smart 12-year-old, what would you say?"
+                  rows="8"
+                  aria-describedby="explainMeta"
+                ></textarea>
+                <div class="metaRow">
+                  <p class="metaRow__hint" id="explainMeta" aria-live="polite">0 words</p>
+                  <button class="btn btn--solid" type="button" id="genCard">Generate card</button>
+                </div>
+              </div>
 
         <div class="pricing">
           <article class="plan">
@@ -377,29 +410,90 @@
                   0/2 referrals tracked. Refer 2 friends to unlock 5 sessions/day.
                 </p>
               </div>
-              <div class="field">
-                <label class="label" for="refLink">Your referral link</label>
-                <div class="field__row">
-                  <input class="input" id="refLink" readonly />
-                  <button class="btn btn--ghost" type="button" id="copyRef">
-                    Copy
+            </div>
+
+            <div class="wait__form">
+              <form class="form" id="waitlistForm">
+                <label class="label" for="email">Email</label>
+                <input
+                  type="email"
+                  class="input input--big"
+                  id="email"
+                  name="email"
+                  autocomplete="email"
+                  inputmode="email"
+                  placeholder="you@domain.com"
+                  required
+                  aria-describedby="waitlistErrMsg"
+                />
+                <button class="btn btn--solid btn--big btn--wide" type="submit" id="waitlistSubmit">
+                  Join waitlist
+                </button>
+                <p class="fine">
+                  No spam. One “you’re in” email, then a TestFlight invite when it’s your turn.
+                </p>
+              </form>
+
+              <div class="result" id="waitlistResult" hidden>
+                <p class="result__t" id="waitlistTitle">You're in!</p>
+                <div class="reward-badge">
+                  <span class="reward-badge__icon" aria-hidden="true"></span>
+                  <span>You unlocked: <strong>3 sessions/day</strong></span>
+                </div>
+                <p class="result__p" id="waitlistMsg">
+                  Refer friends to unlock more free sessions at launch.
+                </p>
+                <div class="referral-progress">
+                  <div class="referral-progress__bar">
+                    <div class="referral-progress__fill" style="width: 0%"></div>
+                  </div>
+                  <p class="referral-progress__text">Refer 2 friends → unlock 5 sessions/day</p>
+                </div>
+                <div class="field">
+                  <label class="label" for="refLink">Your referral link</label>
+                  <div class="field__row">
+                    <input class="input" id="refLink" readonly />
+                    <button class="btn btn--ghost" type="button" id="copyRef">
+                      Copy
+                    </button>
+                  </div>
+                </div>
+                <div class="shareRow">
+                  <button class="btn btn--ghost btn--wide" type="button" id="shareText">
+                    Copy text
                   </button>
                 </div>
               </div>
-              <div class="shareRow">
-                <button class="btn btn--ghost btn--wide" type="button" id="shareText">
-                  Copy text
-                </button>
-                <a class="btn btn--solid btn--wide" id="shareX" href="#" target="_blank" rel="noreferrer">
-                  Share on X
-                </a>
+
+              <div class="result result--err" id="waitlistErr" hidden role="alert" aria-live="assertive">
+                <p class="result__t">Couldn't add you (yet).</p>
+                <p class="result__p" id="waitlistErrMsg">
+                  This page needs Supabase configured. See README.md.
+                </p>
               </div>
             </div>
 
-            <div class="result result--err" id="waitlistErr" hidden role="alert" aria-live="assertive">
-              <p class="result__t">Couldn't add you (yet).</p>
-              <p class="result__p" id="waitlistErrMsg">
-                This page needs Supabase configured. See README.md.
+          <div class="faq">
+            <h3 class="h3">Frequently Asked Questions</h3>
+            <details class="qa">
+              <summary>Is the demo “real AI”?</summary>
+              <p>
+                Not yet. The iOS app will run a real AI coach and save cards to your profile. This
+                page keeps the demo local so it works anywhere.
+              </p>
+            </details>
+            <details class="qa">
+              <summary>What makes it different from “just ask ChatGPT”?</summary>
+              <p>
+                The timer, the gap questions tied to your own explanation, and the habit loop: daily
+                prompts, streaks, review scheduling, and shareable cards that stay short.
+              </p>
+            </details>
+            <details class="qa">
+              <summary>Will you support technical + non-technical topics?</summary>
+              <p>
+                Yes. The coach works for math, programming, history, money, and everyday life. The
+                only hard exclusion is NSFW.
               </p>
               <button class="btn btn--ghost" type="button" id="recoverWaitlist">
                 Recover referral link

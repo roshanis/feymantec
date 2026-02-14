@@ -6,11 +6,10 @@
 - `styles.css`: global styling (CSS variables live in `:root`).
 - `app.js`: demo logic, share-link generation, waitlist + referral submission.
 - `lib/feymantec-core.js`: shared, testable utilities (encoding, heuristics, validation).
-- `lib/feymantec-supabase.js`: fetch-based Supabase helper (Auth OTP + PostgREST calls).
 - `share/`: shareable "Feynman Card" page and renderer.
   - `share/index.html`
   - `share/share.js`
-- `tests/`: unit tests (Vitest) and E2E tests (Playwright under `tests/e2e/`).
+- `tests/`: unit tests (`node:test`).
 - `supabase/migrations/`: database migrations for waitlist/referrals.
   - `supabase/migrations/0001_waitlist.sql`
   - `supabase/migrations/0002_waitlist_auth.sql`
@@ -26,10 +25,8 @@ Runtime is a static site (HTML/CSS/JS). Dev tooling uses `vitest` and `playwrigh
   - `python3 -m http.server 5173`
   - Visit `http://localhost:5173`
 - Run unit tests:
-  - `npm test` (Vitest)
+  - `npm test` (or `node --test`)
   - `npm run test:watch` (TDD loop)
-- Run E2E tests:
-  - `npm run test:e2e` (Playwright; uses `npm run serve` via Playwright config)
 - Lint (syntax checks only):
   - `npm run lint`
 
@@ -42,7 +39,7 @@ Runtime is a static site (HTML/CSS/JS). Dev tooling uses `vitest` and `playwrigh
 
 ## Testing Guidelines
 
-Unit tests use Vitest. Follow TDD for core changes:
+Unit tests use Node's built-in runner (`node:test`). Follow TDD for core changes:
 
 - Write a failing test in `tests/*.test.js` first (prefer testing `lib/feymantec-core.js`).
 - Implement/fix logic, then run `npm test` until green.

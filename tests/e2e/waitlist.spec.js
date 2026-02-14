@@ -15,15 +15,6 @@ test.describe('Waitlist signup flow', () => {
     await expect(email).toHaveAttribute('required');
   });
 
-  test('OTP step exists and is hidden by default', async ({ page }) => {
-    const otpStep = page.locator('#otpStep');
-    await expect(otpStep).toBeAttached();
-    await expect(otpStep).toBeHidden();
-
-    const submit = page.locator('#waitlistSubmit');
-    await expect(submit).toContainText(/send code/i);
-  });
-
   test('form has proper aria attributes for accessibility', async ({ page }) => {
     const errMsg = page.locator('#waitlistErrMsg');
     // Error message should have role="alert" for screen readers

@@ -225,7 +225,7 @@ function renderError() {
   qs("#shareBody").innerHTML = `
     <div class="block">
       <p class="block__t">Error</p>
-      <p class="block__p">This link is broken or expired. <a href="../index.html#demo">Create your own card</a>.</p>
+      <p class="block__p">This link is broken or expired. <a href="/">Create your own card</a>.</p>
     </div>
   `;
 }

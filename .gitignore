@@ -19,8 +19,6 @@ Thumbs.db
 # Logs
 *.log
 !development.log.md
-.claude/
 
-# Playwright
-playwright-report/
-test-results/
+# Claude Code
+.claude/

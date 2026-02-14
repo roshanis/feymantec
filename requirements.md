@@ -79,7 +79,7 @@ This web artifact is the "web-first" validation layer:
 - NFR-003: Accessible basics: keyboard navigation, focus states, readable contrast, skip link.
 - NFR-004: No secret keys shipped to the client.
 - NFR-005: Safe topic policy: block NSFW and provide disclaimers for sensitive topics (health/legal/finance).
-- NFR-006: TDD: add/update unit tests for core logic and bug fixes. Tests live in `tests/**/*.test.js` and must pass via `npm test` (Vitest).
+- NFR-006: TDD: add/update unit tests for core logic and bug fixes. Tests live in `tests/**/*.test.js` and must pass via `node --test` (or `npm test`).
 
 ## Data Requirements (Supabase)
 
