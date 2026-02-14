@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light" />
 
-    <title>Feymantec | Learn Any Concept in 5 Minutes</title>
+    <title>Feymantec | Learn Any Concept From First Principles in 5 Minutes</title>
     <meta
       name="description"
-      content="A 5-minute Feynman coach: explain simply, find your gaps, and lock it in. Join the TestFlight waitlist."
+      content="Learn any concept from first principles in 5 minutes. Explain simply, find your gaps, and lock it in. Join the Feymantec waitlist."
     />
 
-    <meta property="og:title" content="Feymantec" />
+    <meta property="og:title" content="Feymantec — Learn from first principles" />
     <meta
       property="og:description"
-      content="Learn any concept in 5 minutes using the Feynman technique. Explain it. Find the gap. Teach it back."
+      content="Learn any concept from first principles in 5 minutes. Explain it. Find the gap. Teach it back."
     />
     <meta property="og:type" content="website" />
 
@@ -29,6 +29,8 @@
 
     <link rel="stylesheet" href="styles.css" />
     <script src="lib/feymantec-core.js" defer></script>
+    <script src="lib/feymantec-supabase.js" defer></script>
+    <script src="lib/feymantec-ai.js" defer></script>
     <script src="config.js"></script>
     <script src="app.js" defer></script>
   </head>
@@ -41,7 +43,7 @@
         <a class="brand" href="#top" aria-label="Feymantec home">
           <span class="brand__mark" aria-hidden="true"></span>
           <span class="brand__name">Feymantec</span>
-          <span class="brand__tag">5-minute clarity</span>
+          <span class="brand__tag">First principles in 5 minutes</span>
         </a>
 
         <button
@@ -68,8 +70,8 @@
         </nav>
 
         <div class="topbar__cta">
-          <a class="btn btn--ghost" href="#demo">Try demo</a>
-          <a class="btn btn--solid" href="#waitlist">Join TestFlight</a>
+          <a class="btn btn--ghost" href="login.html">Sign in</a>
+          <a class="btn btn--solid" href="#waitlist">Join Feymantec</a>
         </div>
       </div>
     </header>
@@ -88,23 +90,19 @@
         <div class="shell hero__inner">
           <div class="hero__copy">
             <p class="kicker reveal" style="--d: 0ms">
-              The Feynman technique, compressed into a timer you can actually finish.
+              Learn from first principles.
             </p>
 
             <h1 class="hero__title reveal" style="--d: 80ms">
-              Learn any concept in <span class="hl">5 minutes</span>.
-              <span class="hero__title2">Explain it. Find the gap. Teach it back.</span>
+              Understand any concept<br />in <span class="hl">5 minutes</span>.
             </h1>
 
             <p class="hero__sub reveal" style="--d: 160ms">
-              Feymantec is a voice-first iOS coach that turns “I think I get it” into a clean,
-              shareable explanation you can re-teach in 60 seconds.
+              A voice-first coach that turns “I think I get it”<br />
+              into an explanation you can teach back.
             </p>
 
             <div class="hero__actions reveal" style="--d: 240ms">
-              <a class="btn btn--solid btn--big" href="#waitlist">
-                Get a TestFlight invite
-              </a>
               <a class="btn btn--ghost btn--big" href="#demo">
                 Try the card generator
               </a>
@@ -118,6 +116,7 @@
             </div>
 
             <div class="hero__chips reveal" style="--d: 320ms">
+              <span class="chip">First principles</span>
               <span class="chip">Voice-first</span>
               <span class="chip">Clarity score</span>
               <span class="chip">Streaks</span>
@@ -177,7 +176,7 @@
           <div class="section__head">
             <h2 class="h2">The 5-minute loop</h2>
             <p class="lead">
-              You don't “study” in Feymantec. You teach. The app keeps you moving when you stall.
+              You don’t memorize in Feymantec. You rebuild from first principles. The app keeps you moving when you stall.
             </p>
           </div>
 
@@ -186,35 +185,35 @@
               <p class="stepCard__n">01</p>
               <h3 class="stepCard__t">Pick the concept</h3>
               <p class="stepCard__p">
-                Type or speak a topic. The app gives you a clean target and a timer.
+                Type or speak a topic. The app gives you a clean starting point to reason from.
               </p>
             </article>
             <article class="stepCard">
               <p class="stepCard__n">02</p>
               <h3 class="stepCard__t">Explain simply</h3>
               <p class="stepCard__p">
-                Talk for 2 minutes. No notes. If you reach for jargon, the coach flags it.
+                Explain from the ground up. No notes, no jargon. If you skip a step, the coach flags it.
               </p>
             </article>
             <article class="stepCard">
               <p class="stepCard__n">03</p>
               <h3 class="stepCard__t">Find the gap</h3>
               <p class="stepCard__p">
-                You get 2–4 sharp questions tied to your own words, not generic trivia.
+                You get 2–4 sharp questions that test your first-principles reasoning, not surface recall.
               </p>
             </article>
             <article class="stepCard">
               <p class="stepCard__n">04</p>
               <h3 class="stepCard__t">Rewrite + analogy</h3>
               <p class="stepCard__p">
-                Compress your explanation. Add one analogy you can remember later.
+                Compress your explanation to its foundation. Add one analogy you can remember later.
               </p>
             </article>
             <article class="stepCard">
               <p class="stepCard__n">05</p>
               <h3 class="stepCard__t">Quick check</h3>
               <p class="stepCard__p">
-                Two questions. If you miss, the app schedules a 90-second re-teach.
+                Two questions. If you miss, the app takes you back to rebuild from the base.
               </p>
             </article>
           </div>
@@ -226,8 +225,8 @@
           <div class="section__head">
             <h2 class="h2">Try the Card Generator</h2>
             <p class="lead">
-              This is a local preview for the landing page. The iOS app will run a real AI coach and
-              save cards to your profile.
+              This is a local preview. Build a card from first principles — the iOS app adds a real AI coach
+              and saves cards to your profile.
             </p>
           </div>
 
@@ -257,7 +256,7 @@
                   class="textarea"
                   id="explain"
                   name="explain"
-                  placeholder="Talk it out. If you had to teach a smart 12-year-old, what would you say?"
+                  placeholder="Start from the very basics. If you had to teach a smart 12-year-old from scratch, what would you say?"
                   rows="8"
                   aria-describedby="explainMeta"
                 ></textarea>
@@ -317,13 +316,6 @@
                 </div>
               </div>
 
-              <div class="callout">
-                <p class="callout__t">What makes the app sticky</p>
-                <p class="callout__p">
-                  You earn streak freezes by completing sessions, not by paying. Referrals unlock extra
-                  free sessions at launch.
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -359,7 +351,7 @@
               <div class="plan__top">
                 <h3 class="plan__name">Pro</h3>
                 <p class="plan__price">~$7/mo</p>
-                <p class="plan__sub">For people who want compounding understanding.</p>
+                <p class="plan__sub">For people who want compounding, first-principles understanding.</p>
               </div>
               <ul class="plan__list">
                 <li>Unlimited sessions</li>
@@ -388,27 +380,11 @@
           </div>
 
           <div class="community">
-            <div class="community__left">
-              <div class="poster">
-                <p class="poster__k">This week’s board (mock)</p>
-                <ol class="board" aria-label="Mock leaderboard">
-                  <li class="board__row"><span class="board__rank">1</span> <span class="board__name">Asha</span> <span class="board__stat">42 cards</span></li>
-                  <li class="board__row"><span class="board__rank">2</span> <span class="board__name">Miles</span> <span class="board__stat">37 cards</span></li>
-                  <li class="board__row"><span class="board__rank">3</span> <span class="board__name">Jun</span> <span class="board__stat">33 cards</span></li>
-                  <li class="board__row"><span class="board__rank">4</span> <span class="board__name">Leila</span> <span class="board__stat">29 cards</span></li>
-                  <li class="board__row"><span class="board__rank">5</span> <span class="board__name">Omar</span> <span class="board__stat">24 cards</span></li>
-                </ol>
-                <p class="poster__micro">
-                  Boards can be by category (Science, Money, Tech, Life) and by “clarity score”.
-                </p>
-              </div>
-            </div>
-
             <div class="community__right">
               <div class="quote">
                 <p class="quote__t">The only real test of understanding:</p>
                 <p class="quote__b">
-                  can you explain it without leaning on fancy words?
+                  can you explain it from first principles, without leaning on fancy words?
                 </p>
               </div>
 
@@ -441,7 +417,7 @@
             <div class="wait__copy">
               <h2 class="h2">Join the waitlist</h2>
               <p class="lead">
-                We’re launching on TestFlight first. Invite friends to unlock extra free sessions at
+                We’re launching on Feymantec first. Invite friends to unlock extra free sessions at
                 launch.
               </p>
               <div class="note">
@@ -471,7 +447,7 @@
                   Join waitlist
                 </button>
                 <p class="fine">
-                  No spam. One “you’re in” email, then a TestFlight invite when it’s your turn.
+                  No spam. One “you’re in” email, then a Feymantec invite when it’s your turn.
                 </p>
               </form>
 
@@ -530,8 +506,8 @@
             <details class="qa">
               <summary>What makes it different from “just ask ChatGPT”?</summary>
               <p>
-                The timer, the gap questions tied to your own explanation, and the habit loop: daily
-                prompts, streaks, review scheduling, and shareable cards that stay short.
+                The first-principles approach. The timer, the gap questions tied to your own reasoning, and the
+                habit loop: daily prompts, streaks, review scheduling, and shareable cards that stay short.
               </p>
             </details>
             <details class="qa">
@@ -551,10 +527,14 @@
         <p class="footer__left">
           <span class="brand__name">Feymantec</span>
           <span class="footer__dot" aria-hidden="true">·</span>
-          <span class="muted">Build understanding, not notes.</span>
+          <span class="muted">First principles, not flashcards.</span>
         </p>
+        <nav class="footer__links">
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+        </nav>
         <p class="footer__right">
-          <span class="muted">©</span> <span id="year"></span>
+          <span class="muted">&copy;</span> <span id="year"></span>
         </p>
       </div>
     </footer>

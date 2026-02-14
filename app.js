@@ -15,6 +15,7 @@ if (!Core) {
 
 const { safeTrim, wordCount, isLikelyNSFW, randomId, escapeHtml, buildPreviewCard, encodeJsonToBase64Url, toSharePayload } =
   Core;
+const AI = globalThis.FeymantecAI || null;
 
 function getParams() {
   const u = new URL(window.location.href);
@@ -377,20 +378,28 @@ function initDemo(daily) {
   const genBtn = qs("#genCard");
   const fillDaily = qs("#fillDaily");
 
-  function setConcept(v) {
+  function setConcept(v, options = {}) {
     if (!conceptEl) return;
+    const { readyForUse = false } = options;
     conceptEl.value = v;
+    if (readyForUse && explainEl) {
+      explainEl.focus();
+      // Place cursor at the end so users can start typing immediately.
+      const end = explainEl.value.length;
+      explainEl.setSelectionRange(end, end);
+      return;
+    }
     conceptEl.focus();
   }
   setConceptSuggestions(setConcept);
 
-  if (fillDaily) fillDaily.addEventListener("click", () => setConcept(daily.getDaily()));
+  if (fillDaily) fillDaily.addEventListener("click", () => setConcept(daily.getDaily(), { readyForUse: true }));
 
   try {
     const fromHero = safeTrim(sessionStorage.getItem("feym_demo_concept") || "");
     if (fromHero) {
       sessionStorage.removeItem("feym_demo_concept");
-      setConcept(fromHero);
+      setConcept(fromHero, { readyForUse: true });
     }
   } catch {
     // ignore
@@ -420,15 +429,75 @@ function initDemo(daily) {
     qs("#copyShare")?.setAttribute("data-share-href", new URL(href, window.location.href).toString());
   }
 
+  function renderAiCoachResult(aiResult) {
+    const out = qs("#cardBody");
+    if (!out || !aiResult) return;
+
+    const resultText = safeTrim(aiResult.resultText || "");
+    const suggestions = Array.isArray(aiResult.suggestions) ? aiResult.suggestions.map((s) => safeTrim(String(s))).filter(Boolean) : [];
+    const scoreNum = Number(aiResult.score);
+    const hasScore = Number.isFinite(scoreNum);
+
+    if (!resultText && suggestions.length === 0) return;
+
+    const scoreHint = hasScore
+      ? `<p class="block__p"><span class="muted">AI clarity score:</span> ${Math.max(0, Math.min(100, Math.round(scoreNum)))}</p>`
+      : "";
+    const suggestionsHtml = suggestions.length
+      ? `<ol class="block__list">${suggestions.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ol>`
+      : "";
+
+    out.insertAdjacentHTML(
+      "beforeend",
+      `
+      <div class="block">
+        <p class="block__t">AI Coach (OpenAI)</p>
+        <p class="block__p">${escapeHtml(resultText) || "<span class='muted'>No coach text returned.</span>"}</p>
+        ${scoreHint}
+        ${suggestionsHtml}
+      </div>
+      `
+    );
+
+    if (hasScore) {
+      const scoreEl = qs("#clarityScore");
+      if (scoreEl) scoreEl.textContent = String(Math.max(0, Math.min(100, Math.round(scoreNum))));
+    }
+  }
+
+  async function runAiCoach({ concept, v1 }) {
+    const client = getAiClient();
+    if (!client) return null;
+    return await client.explain({
+      topic: concept,
+      inputText: v1,
+      mode: "daily5",
+    });
+  }
+
   if (genBtn) {
-    genBtn.addEventListener("click", () => {
+    genBtn.addEventListener("click", async () => {
+      const originalLabel = genBtn.textContent;
+      genBtn.disabled = true;
+      genBtn.textContent = "Generating…";
       try {
         makeCard();
+        const concept = safeTrim(conceptEl?.value || "");
+        const v1 = safeTrim(explainEl?.value || "");
+        try {
+          const aiResult = await runAiCoach({ concept, v1 });
+          renderAiCoachResult(aiResult);
+        } catch {
+          // Keep local card output if AI call fails.
+        }
       } catch (e) {
         qs("#cardTitle").textContent = "Fix one thing";
         qs("#clarityScore").textContent = "—";
         qs("#cardBody").innerHTML = `<p class="muted">${escapeHtml(e?.message || "Couldn’t generate a card.")}</p>`;
         qs("#cardFoot").hidden = true;
+      } finally {
+        genBtn.disabled = false;
+        genBtn.textContent = originalLabel || "Generate card";
       }
     });
   }
@@ -463,9 +532,22 @@ function getConfig() {
   return {
     supabaseUrl: safeTrim(cfg.supabaseUrl),
     supabaseAnonKey: safeTrim(cfg.supabaseAnonKey),
+    aiFunctionName: safeTrim(cfg.aiFunctionName || "ai-explain"),
     waitlistTable: safeTrim(cfg.waitlistTable || "waitlist_signups"),
     siteUrl: safeTrim(cfg.siteUrl) || safeTrim(window.location.origin),
   };
+}
+
+function getAiClient() {
+  if (!AI) return null;
+  const cfg = getConfig();
+  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return null;
+  return AI.createAiClient({
+    supabaseUrl: cfg.supabaseUrl,
+    anonKey: cfg.supabaseAnonKey,
+    functionName: cfg.aiFunctionName || "ai-explain",
+    fetchFn: fetch,
+  });
 }
 
 async function supabaseInsertWaitlist({ email, refCode, referredBy, utm }) {
@@ -558,7 +640,7 @@ function initWaitlist() {
     qs("#shareX")?.setAttribute(
       "href",
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        `I’m on the Feymantec TestFlight waitlist. Join me: ${link}`
+        `I’m on the Feymantec waitlist. Join me: ${link}`
       )}`
     );
   }
@@ -574,7 +656,7 @@ function initWaitlist() {
   qs("#shareText")?.addEventListener("click", async () => {
     const link = refLink?.value || "";
     if (!link) return;
-    const text = `Join my Feymantec TestFlight waitlist link: ${link}`;
+    const text = `Join my Feymantec waitlist link: ${link}`;
     const ok = await copyText(text);
     qs("#shareText").textContent = ok ? "Copied" : "Copy failed";
     window.setTimeout(() => (qs("#shareText").textContent = "Copy text"), 1200);
