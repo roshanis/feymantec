@@ -1,0 +1,267 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "Feymantec home" [ref=e5] [cursor=pointer]:
+        - /url: "#top"
+        - generic [ref=e7]: Feymantec
+        - generic [ref=e8]: 5-minute clarity
+      - navigation [ref=e9]:
+        - link "How it works" [ref=e10] [cursor=pointer]:
+          - /url: "#loop"
+        - link "Demo" [ref=e11] [cursor=pointer]:
+          - /url: "#demo"
+        - link "Pricing" [ref=e12] [cursor=pointer]:
+          - /url: "#pricing"
+        - link "Community" [ref=e13] [cursor=pointer]:
+          - /url: "#community"
+        - link "Waitlist" [ref=e14] [cursor=pointer]:
+          - /url: "#waitlist"
+      - generic [ref=e15]:
+        - link "Try demo" [ref=e16] [cursor=pointer]:
+          - /url: "#demo"
+        - link "Join TestFlight" [ref=e17] [cursor=pointer]:
+          - /url: "#waitlist"
+  - main [ref=e18]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - paragraph [ref=e22]: The Feynman technique, compressed into a timer you can actually finish.
+        - heading "Learn any concept in 5 minutes. Explain it. Find the gap. Teach it back." [level=1] [ref=e23]:
+          - text: Learn any concept in 5 minutes.
+          - generic [ref=e24]: Explain it. Find the gap. Teach it back.
+        - paragraph [ref=e25]: Feymantec is a voice-first iOS coach that turns “I think I get it” into a clean, shareable explanation you can re-teach in 60 seconds.
+        - generic [ref=e26]:
+          - link "Get a TestFlight invite" [ref=e27] [cursor=pointer]:
+            - /url: "#waitlist"
+          - link "Try the card generator" [ref=e28] [cursor=pointer]:
+            - /url: "#demo"
+        - generic [ref=e32]:
+          - text: Join
+          - strong [ref=e33]: 2,400+
+          - text: learners on the waitlist
+        - generic [ref=e34]:
+          - generic [ref=e35]: Voice-first
+          - generic [ref=e36]: Clarity score
+          - generic [ref=e37]: Streaks
+          - generic [ref=e38]: Spaced review
+          - generic [ref=e39]: Public cards
+      - complementary [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - paragraph [ref=e43]: Your Daily 5
+            - tablist "Daily prompt modes" [ref=e44]:
+              - tab "Random" [ref=e45] [cursor=pointer]
+              - tab "Trending" [ref=e46] [cursor=pointer]
+              - tab "For you" [ref=e47] [cursor=pointer]
+          - generic [ref=e48]:
+            - img [ref=e49]
+            - generic [ref=e52]:
+              - paragraph [ref=e53]: 5:00
+              - paragraph [ref=e54]: Explain like I'm 12.
+          - generic [ref=e55]:
+            - paragraph [ref=e56]: How a bill becomes a law
+            - paragraph [ref=e57]: A random prompt. The habit is the point.
+          - generic [ref=e58]:
+            - link "Try demo with this" [ref=e59] [cursor=pointer]:
+              - /url: "#demo"
+            - button "Shuffle" [ref=e60] [cursor=pointer]
+    - generic [ref=e62]:
+      - generic [ref=e63]:
+        - heading "The 5-minute loop" [level=2] [ref=e64]
+        - paragraph [ref=e65]: You don't “study” in Feymantec. You teach. The app keeps you moving when you stall.
+      - generic [ref=e66]:
+        - article [ref=e67]:
+          - paragraph [ref=e68]: "01"
+          - heading "Pick the concept" [level=3] [ref=e69]
+          - paragraph [ref=e70]: Type or speak a topic. The app gives you a clean target and a timer.
+        - article [ref=e71]:
+          - paragraph [ref=e72]: "02"
+          - heading "Explain simply" [level=3] [ref=e73]
+          - paragraph [ref=e74]: Talk for 2 minutes. No notes. If you reach for jargon, the coach flags it.
+        - article [ref=e75]:
+          - paragraph [ref=e76]: "03"
+          - heading "Find the gap" [level=3] [ref=e77]
+          - paragraph [ref=e78]: You get 2–4 sharp questions tied to your own words, not generic trivia.
+        - article [ref=e79]:
+          - paragraph [ref=e80]: "04"
+          - heading "Rewrite + analogy" [level=3] [ref=e81]
+          - paragraph [ref=e82]: Compress your explanation. Add one analogy you can remember later.
+        - article [ref=e83]:
+          - paragraph [ref=e84]: "05"
+          - heading "Quick check" [level=3] [ref=e85]
+          - paragraph [ref=e86]: Two questions. If you miss, the app schedules a 90-second re-teach.
+    - generic [ref=e88]:
+      - generic [ref=e89]:
+        - heading "Try the Card Generator" [level=2] [ref=e90]
+        - paragraph [ref=e91]: This is a local preview for the landing page. The iOS app will run a real AI coach and save cards to your profile.
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - generic [ref=e94]:
+            - generic [ref=e95]: Concept
+            - generic [ref=e96]:
+              - textbox "Concept" [ref=e97]:
+                - /placeholder: e.g. Bayes’ theorem
+              - button "Use Daily 5" [ref=e98] [cursor=pointer]
+            - generic "Suggested concepts" [ref=e99]:
+              - button "Bayes’ theorem" [ref=e100] [cursor=pointer]
+              - button "What is inflation?" [ref=e101] [cursor=pointer]
+              - button "Why do planes fly?" [ref=e102] [cursor=pointer]
+              - button "The three-body problem" [ref=e103] [cursor=pointer]
+              - button "How a database index works" [ref=e104] [cursor=pointer]
+              - button "The placebo effect" [ref=e105] [cursor=pointer]
+              - button "What is an ETF?" [ref=e106] [cursor=pointer]
+              - button "Why do we sleep?" [ref=e107] [cursor=pointer]
+          - generic [ref=e108]:
+            - generic [ref=e109]: Your explanation (v1)
+            - textbox "Your explanation (v1)" [ref=e110]:
+              - /placeholder: Talk it out. If you had to teach a smart 12-year-old, what would you say?
+            - generic [ref=e111]:
+              - paragraph [ref=e112]: 0 words
+              - button "Generate card" [ref=e113] [cursor=pointer]
+          - generic [ref=e114]:
+            - generic [ref=e115]:
+              - paragraph [ref=e116]: Challenge modes (rotates daily)
+              - generic [ref=e117]:
+                - generic [ref=e118]: No Jargon
+                - generic [ref=e119]: One Example
+                - generic [ref=e120]: Teach in 60s
+            - generic [ref=e121]:
+              - paragraph [ref=e122]: Topic policy
+              - paragraph [ref=e123]: All topics allowed except NSFW. Sensitive domains get clear disclaimers.
+        - generic [ref=e124]:
+          - generic [ref=e125]:
+            - generic [ref=e126]:
+              - generic [ref=e127]:
+                - paragraph [ref=e128]: Feynman Card
+                - heading "Your card appears here" [level=3] [ref=e129]
+              - generic "Clarity score" [ref=e130]:
+                - paragraph [ref=e131]: —
+                - paragraph [ref=e132]: Clarity
+            - paragraph [ref=e134]: Add a concept and an explanation, then hit “Generate card”.
+            - generic [ref=e135]:
+              - link "Open share page" [ref=e136] [cursor=pointer]:
+                - /url: share/index.html
+              - button "Copy share link" [ref=e137] [cursor=pointer]
+              - button "Download PNG" [ref=e138] [cursor=pointer]
+          - generic [ref=e139]:
+            - paragraph [ref=e140]: What makes the app sticky
+            - paragraph [ref=e141]: You earn streak freezes by completing sessions, not by paying. Referrals unlock extra free sessions at launch.
+    - generic [ref=e143]:
+      - generic [ref=e144]:
+        - heading "Freemium, but fair" [level=2] [ref=e145]
+        - paragraph [ref=e146]: You can build the habit for free. Power users go unlimited.
+      - generic [ref=e147]:
+        - article [ref=e148]:
+          - generic [ref=e149]:
+            - heading "Free" [level=3] [ref=e150]
+            - paragraph [ref=e151]: $0
+            - paragraph [ref=e152]: For building the “Daily 5” habit.
+          - list [ref=e153]:
+            - listitem [ref=e154]: 3 sessions/day (AI coach)
+            - listitem [ref=e155]: Unlimited saved cards
+            - listitem [ref=e156]: Share links
+            - listitem [ref=e157]: Basic quizzes
+          - link "Join waitlist" [ref=e158] [cursor=pointer]:
+            - /url: "#waitlist"
+        - article [ref=e159]:
+          - generic [ref=e160]: Most effective
+          - generic [ref=e161]:
+            - heading "Pro" [level=3] [ref=e162]
+            - paragraph [ref=e163]: ~$7/mo
+            - paragraph [ref=e164]: For people who want compounding understanding.
+          - list [ref=e165]:
+            - listitem [ref=e166]: Unlimited sessions
+            - listitem [ref=e167]: Longer sessions (10–15 min)
+            - listitem [ref=e168]: Spaced review scheduler
+            - listitem [ref=e169]: Learning paths (prerequisite chains)
+            - listitem [ref=e170]: Advanced quizzes + explanations
+          - link "Get early pricing" [ref=e171] [cursor=pointer]:
+            - /url: "#waitlist"
+      - paragraph [ref=e172]: Pricing is provisional. We’ll lock it before the public App Store release.
+    - generic [ref=e174]:
+      - generic [ref=e175]:
+        - heading "Public cards. Profiles. Leaderboards." [level=2] [ref=e176]
+        - paragraph [ref=e177]: Keep it private, or publish your best explanations and climb a “most helpful teachers” board.
+      - generic [ref=e178]:
+        - generic [ref=e180]:
+          - paragraph [ref=e181]: This week’s board (mock)
+          - list "Mock leaderboard" [ref=e182]:
+            - listitem [ref=e183]:
+              - generic [ref=e184]: "1"
+              - generic [ref=e185]: Asha
+              - generic [ref=e186]: 42 cards
+            - listitem [ref=e187]:
+              - generic [ref=e188]: "2"
+              - generic [ref=e189]: Miles
+              - generic [ref=e190]: 37 cards
+            - listitem [ref=e191]:
+              - generic [ref=e192]: "3"
+              - generic [ref=e193]: Jun
+              - generic [ref=e194]: 33 cards
+            - listitem [ref=e195]:
+              - generic [ref=e196]: "4"
+              - generic [ref=e197]: Leila
+              - generic [ref=e198]: 29 cards
+            - listitem [ref=e199]:
+              - generic [ref=e200]: "5"
+              - generic [ref=e201]: Omar
+              - generic [ref=e202]: 24 cards
+          - paragraph [ref=e203]: Boards can be by category (Science, Money, Tech, Life) and by “clarity score”.
+        - generic [ref=e204]:
+          - generic [ref=e205]:
+            - paragraph [ref=e206]: "The only real test of understanding:"
+            - paragraph [ref=e207]: can you explain it without leaning on fancy words?
+          - generic [ref=e208]:
+            - generic [ref=e209]:
+              - paragraph [ref=e210]: Profiles
+              - paragraph [ref=e211]: Your best cards, your streak, your “teach streak” chart.
+            - generic [ref=e212]:
+              - paragraph [ref=e213]: Public cards
+              - paragraph [ref=e214]: Share a link, embed it, or export a crisp PNG.
+            - generic [ref=e215]:
+              - paragraph [ref=e216]: Collections
+              - paragraph [ref=e217]: Turn your cards into a personal mini‑textbook.
+            - generic [ref=e218]:
+              - paragraph [ref=e219]: Reviews
+              - paragraph [ref=e220]: 90‑second re-teaches on day 1, 3, and 7.
+    - generic [ref=e222]:
+      - generic [ref=e223]:
+        - generic [ref=e224]:
+          - heading "Join the waitlist" [level=2] [ref=e225]
+          - paragraph [ref=e226]: We’re launching on TestFlight first. Invite friends to unlock extra free sessions at launch.
+          - generic [ref=e227]:
+            - paragraph [ref=e228]: Topic policy
+            - paragraph [ref=e229]: All topics allowed except NSFW. For health/legal/financial topics, the coach will include clear disclaimers and push you toward verified sources.
+        - generic [ref=e230]:
+          - generic [ref=e231]:
+            - generic [ref=e232]: Email
+            - textbox "Email" [ref=e233]:
+              - /placeholder: you@domain.com
+            - generic [ref=e234]:
+              - generic [ref=e235]: Email code
+              - textbox "Email code" [ref=e236]:
+                - /placeholder: 6-digit code
+              - paragraph [ref=e237]: We emailed you a 6-digit code. It expires in ~10 minutes.
+              - generic [ref=e238]:
+                - button "Resend code" [ref=e239] [cursor=pointer]
+                - button "Use different email" [ref=e240] [cursor=pointer]
+            - button "Send code" [ref=e241] [cursor=pointer]
+            - paragraph [ref=e242]: No password. We'll email you a one-time code, then a TestFlight invite when it’s your turn.
+          - text: ✓
+      - generic [ref=e243]:
+        - heading "Frequently Asked Questions" [level=3] [ref=e244]
+        - group [ref=e245]:
+          - generic "Is the demo “real AI”?" [ref=e246] [cursor=pointer]
+        - group [ref=e247]:
+          - generic "What makes it different from “just ask ChatGPT”?" [ref=e248] [cursor=pointer]
+        - group [ref=e249]:
+          - generic "Will you support technical + non-technical topics?" [ref=e250] [cursor=pointer]
+  - contentinfo [ref=e251]:
+    - generic [ref=e252]:
+      - paragraph [ref=e253]: Feymantec · Build understanding, not notes.
+      - paragraph [ref=e254]: © 2026
+```

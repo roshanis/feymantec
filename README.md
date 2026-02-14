@@ -51,10 +51,10 @@ supabase functions deploy ai-explain
 
 ```bash
 supabase secrets set OPENAI_API_KEY=your_key_here
-supabase secrets set OPENAI_MODEL=gpt-4o-mini
+supabase secrets set OPENAI_MODEL=gpt-5.2
 ```
 
-`OPENAI_MODEL` is optional; it defaults to `gpt-4o-mini`.
+`OPENAI_MODEL` is optional; it defaults to `gpt-5.2`.
 
 ### 3) Client config
 

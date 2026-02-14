@@ -5,7 +5,7 @@ const CORS_HEADERS = {
 };
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-const DEFAULT_MODEL = "gpt-4o-mini";
+const DEFAULT_MODEL = "gpt-5.2";
 
 type ExplainMode = "simplify" | "critique" | "daily5";
 

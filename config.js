@@ -3,6 +3,7 @@
 window.__FEYNMAN_CONFIG__ = {
   supabaseUrl: "https://narcpnqenogakxvkeiuh.supabase.co",
   supabaseAnonKey: "sb_publishable_lDimobFTWN3QVRPkgWSJyQ_ch45ioL7",
+  aiFunctionName: "ai-explain",
   waitlistTable: "waitlist_signups",
   siteUrl: "",
 };
