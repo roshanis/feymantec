@@ -13,7 +13,7 @@ if (!Core) {
   throw new Error("Missing FeymantecCore. Load lib/feymantec-core.js before app.js.");
 }
 
-const { safeTrim, wordCount, isLikelyNSFW, randomId, escapeHtml, buildPreviewCard, encodeJsonToBase64Url, toSharePayload } =
+const { safeTrim, wordCount, isLikelyNSFW, randomId, escapeHtml, buildPreviewCard, encodeJsonToBase64Url, toSharePayload, DEMO_EXAMPLE } =
   Core;
 const AI = globalThis.FeymantecAI || null;
 
@@ -377,6 +377,7 @@ function initDemo(daily) {
   const explainEl = qs("#explain");
   const genBtn = qs("#genCard");
   const fillDaily = qs("#fillDaily");
+  const seeExample = qs("#seeExample");
 
   function setConcept(v, options = {}) {
     if (!conceptEl) return;
@@ -391,9 +392,25 @@ function initDemo(daily) {
     }
     conceptEl.focus();
   }
+
+  function fillExample() {
+    const example = DEMO_EXAMPLE || {
+      concept: "Compound Interest",
+      explanation: "Compound interest is when you earn interest not just on your initial money, but also on the interest you've already earned."
+    };
+    if (conceptEl) conceptEl.value = example.concept;
+    if (explainEl) {
+      explainEl.value = example.explanation;
+      updateExplainMeta();
+    }
+    // Auto-generate the card to show immediate value
+    if (genBtn) genBtn.click();
+  }
+
   setConceptSuggestions(setConcept);
 
   if (fillDaily) fillDaily.addEventListener("click", () => setConcept(daily.getDaily(), { readyForUse: true }));
+  if (seeExample) seeExample.addEventListener("click", fillExample);
 
   try {
     const fromHero = safeTrim(sessionStorage.getItem("feym_demo_concept") || "");
@@ -440,6 +457,7 @@ function initDemo(daily) {
 
     if (!resultText && suggestions.length === 0) return;
 
+    const modelLabel = aiResult.model ? ` · ${escapeHtml(aiResult.model)}` : "";
     const scoreHint = hasScore
       ? `<p class="block__p"><span class="muted">AI clarity score:</span> ${Math.max(0, Math.min(100, Math.round(scoreNum)))}</p>`
       : "";
@@ -451,7 +469,7 @@ function initDemo(daily) {
       "beforeend",
       `
       <div class="block">
-        <p class="block__t">AI Coach (OpenAI)</p>
+        <p class="block__t">AI Coach (OpenAI)${modelLabel}</p>
         <p class="block__p">${escapeHtml(resultText) || "<span class='muted'>No coach text returned.</span>"}</p>
         ${scoreHint}
         ${suggestionsHtml}
@@ -475,6 +493,15 @@ function initDemo(daily) {
     });
   }
 
+  function renderAiUnavailable() {
+    const out = qs("#cardBody");
+    if (!out) return;
+    out.insertAdjacentHTML(
+      "beforeend",
+      `<div class="block"><p class="block__t">AI Coach</p><p class="muted">AI coach temporarily unavailable. Your card was generated with local heuristics.</p></div>`
+    );
+  }
+
   if (genBtn) {
     genBtn.addEventListener("click", async () => {
       const originalLabel = genBtn.textContent;
@@ -484,11 +511,15 @@ function initDemo(daily) {
         makeCard();
         const concept = safeTrim(conceptEl?.value || "");
         const v1 = safeTrim(explainEl?.value || "");
-        try {
-          const aiResult = await runAiCoach({ concept, v1 });
-          renderAiCoachResult(aiResult);
-        } catch {
-          // Keep local card output if AI call fails.
+        const client = getAiClient();
+        if (client) {
+          genBtn.textContent = "AI coach thinking…";
+          try {
+            const aiResult = await runAiCoach({ concept, v1 });
+            renderAiCoachResult(aiResult);
+          } catch {
+            renderAiUnavailable();
+          }
         }
       } catch (e) {
         qs("#cardTitle").textContent = "Fix one thing";
@@ -533,6 +564,7 @@ function getConfig() {
     supabaseUrl: safeTrim(cfg.supabaseUrl),
     supabaseAnonKey: safeTrim(cfg.supabaseAnonKey),
     aiFunctionName: safeTrim(cfg.aiFunctionName || "ai-explain"),
+    aiApiKey: safeTrim(cfg.aiApiKey || ""),
     waitlistTable: safeTrim(cfg.waitlistTable || "waitlist_signups"),
     siteUrl: safeTrim(cfg.siteUrl) || safeTrim(window.location.origin),
   };
@@ -546,6 +578,7 @@ function getAiClient() {
     supabaseUrl: cfg.supabaseUrl,
     anonKey: cfg.supabaseAnonKey,
     functionName: cfg.aiFunctionName || "ai-explain",
+    aiApiKey: cfg.aiApiKey || "",
     fetchFn: fetch,
   });
 }

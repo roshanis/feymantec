@@ -1,0 +1,347 @@
+/* Onboarding-specific styles */
+
+.onboard-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper2);
+}
+
+/* ── Progress bar ──────────────────────────────────── */
+.onboard-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--line);
+  z-index: 100;
+}
+
+.onboard-progress__bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--aqua), var(--hot));
+  transition: width 300ms ease;
+}
+
+/* ── Main container ────────────────────────────────── */
+.onboard {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+/* ── Steps ─────────────────────────────────────────── */
+.onboard__step {
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+  animation: fadeInUp 400ms ease;
+}
+
+.onboard__step--hidden {
+  display: none;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Icon ──────────────────────────────────────────── */
+.onboard__icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0, 203, 184, 0.2), rgba(255, 77, 115, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboard__icon::before {
+  content: "🎓";
+  font-size: 36px;
+}
+
+/* ── Typography ────────────────────────────────────── */
+.onboard__label {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.onboard__title {
+  font-family: var(--display);
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  line-height: 1.2;
+}
+
+.onboard__sub {
+  font-size: 18px;
+  color: var(--muted);
+  margin: 0 0 32px;
+  line-height: 1.5;
+}
+
+/* ── Method box ────────────────────────────────────── */
+.onboard__method {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px 32px;
+  margin: 0 auto 32px;
+  max-width: 320px;
+  text-align: left;
+}
+
+.onboard__method-title {
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.onboard__method-list {
+  margin: 0;
+  padding-left: 24px;
+  color: var(--muted);
+}
+
+.onboard__method-list li {
+  margin: 8px 0;
+}
+
+/* ── CTA button ────────────────────────────────────── */
+.onboard__cta {
+  margin: 0 auto 32px;
+  display: block;
+  width: fit-content;
+}
+
+/* ── Step indicators ───────────────────────────────── */
+.onboard__steps {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.onboard__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background 200ms ease;
+}
+
+.onboard__dot--active {
+  background: var(--hi);
+}
+
+.onboard__dot--done {
+  background: var(--aqua);
+}
+
+/* ── Suggestions ───────────────────────────────────── */
+.onboard__suggestions {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.suggestion-radio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.suggestion-radio:hover {
+  background: var(--paper2);
+}
+
+.suggestion-radio input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--hi);
+}
+
+.suggestion-radio.is-selected {
+  border-color: var(--hi);
+  background: rgba(194, 75, 54, 0.05);
+}
+
+.suggestion-radio__text {
+  flex: 1;
+  font-size: 17px;
+}
+
+/* ── Custom input ──────────────────────────────────── */
+.onboard__custom {
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.onboard__custom .label {
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* ── Navigation ────────────────────────────────────── */
+.onboard__nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* ── Explanation ───────────────────────────────────── */
+.onboard__explain {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.onboard__explain .textarea {
+  margin-bottom: 8px;
+}
+
+.onboard__wordcount {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.onboard__tip {
+  background: rgba(255, 227, 90, 0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+/* ── Saved message ─────────────────────────────────── */
+.onboard__saved {
+  font-size: 15px;
+  color: var(--aqua);
+  margin: 16px 0 24px;
+  font-weight: 600;
+}
+
+/* ── Celebration ───────────────────────────────────── */
+.onboard__confetti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.onboard__achievement {
+  margin-bottom: 24px;
+}
+
+.achievement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, rgba(255, 227, 90, 0.3), rgba(255, 77, 115, 0.2));
+  border: 2px solid rgba(255, 227, 90, 0.5);
+  border-radius: 50px;
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.achievement-badge__icon::before {
+  content: "🏆";
+  font-size: 24px;
+}
+
+.achievement-badge__text {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* ── Streak ────────────────────────────────────────── */
+.onboard__streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.streak-icon::before {
+  content: "🔥";
+  font-size: 24px;
+}
+
+.onboard__streak-hint {
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+/* ── Options ───────────────────────────────────────── */
+.onboard__options {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 32px;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.onboard__option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 12px 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.onboard__option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--hi);
+}
+
+/* ── Card (reuse from main styles) ─────────────────── */
+.onboard__step .card {
+  text-align: left;
+  margin-bottom: 16px;
+}

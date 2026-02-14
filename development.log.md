@@ -62,8 +62,43 @@ Notes:
 - Package installs now work. Vitest and Playwright are available.
 - Running a local HTTP server may be restricted in this sandbox. Opening `index.html` directly still works for UI validation; Supabase inserts require serving from an origin allowed by your Supabase project settings.
 
+### User Pathway Implementation
+
+- Created comprehensive user pathway strategy
+  - `docs/USER_PATHWAY_STRATEGY.md` - Full product strategy document
+  - `docs/WIREFRAME_SPECS.md` - ASCII wireframes for all flows
+
+- Added Supabase migrations for user data
+  - `supabase/migrations/0004_user_profiles.sql` - User profiles with onboarding state
+  - `supabase/migrations/0005_cards.sql` - Cards table with CRUD + stats triggers
+  - `supabase/migrations/0006_card_reviews.sql` - Spaced repetition (SM-2 intervals)
+  - `supabase/migrations/0007_user_streaks.sql` - Streak tracking with freezes
+  - `supabase/migrations/0008_user_activation_events.sql` - Event tracking for analytics
+
+- Implemented dashboard for logged-in users
+  - `dashboard.html` - Stats, Daily 5, review queue, recent cards
+  - `dashboard.css` - Dashboard-specific styles
+  - `dashboard.js` - Data loading from Supabase, state management
+  - Renamed old dashboard wizard to `create.html` / `create.js`
+
+- Added demo pre-fill feature
+  - "See Example" button pre-fills concept + explanation
+  - Auto-generates card to show immediate value
+  - Added `DEMO_EXAMPLE` and `DAILY_PROMPTS` exports to feymantec-core.js
+
+- Implemented onboarding wizard for new signups
+  - `onboarding.html` - 5-step wizard UI
+  - `onboarding.css` - Wizard-specific styles
+  - `onboarding.js` - State machine with localStorage persistence
+  - Confetti celebration animation on completion
+  - Auto-saves first card to Supabase
+
+- Unit tests updated: 72 tests passing
+
 Next steps:
-1. Configure Supabase and verify inserts from the waitlist form.
+1. Configure Supabase and run the new migrations.
 2. Decide on `siteUrl` and update `config.js` so referral links are correct.
 3. (Optional) Add an Edge Function for a real AI demo (rate-limited) once ready.
 4. Run `npm run test:e2e` to verify E2E tests pass with Playwright.
+5. Implement review.html and cards.html pages for the dashboard navigation.
+6. Add authentication redirect logic (redirect unauthenticated users to login).
