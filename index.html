@@ -8,11 +8,11 @@
 
   <title>Feymantec | Learn Any Concept in 5 Minutes</title>
   <meta name="description"
-    content="A 5-minute Feynman coach: explain simply, find your gaps, and lock it in. Sign up free." />
+    content="A guided Feynman coach: explain simply, find your gaps, and lock it in. Sign up free." />
 
   <meta property="og:title" content="Feymantec" />
   <meta property="og:description"
-    content="Learn any concept in 5 minutes using the Feynman technique. Explain it. Find the gap. Teach it back." />
+    content="Learn any concept by teaching it. Explain it. Find the gap. Teach it back." />
   <meta property="og:type" content="website" />
 
 
@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="lib/feymantec-core.js" defer></script>
   <script src="lib/feymantec-supabase.js" defer></script>
+  <script src="lib/feymantec-ai.js" defer></script>
   <script src="config.js"></script>
   <script src="app.js" defer></script>
 </head>
@@ -34,7 +35,7 @@
       <a class="brand" href="#top" aria-label="Feymantec home">
         <span class="brand__mark" aria-hidden="true"></span>
         <span class="brand__name">Feymantec</span>
-        <span class="brand__tag">5-minute clarity</span>
+        <span class="brand__tag">Feynman clarity</span>
       </a>
 
       <button class="nav-toggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false"
@@ -75,13 +76,13 @@
       <div class="shell hero__inner">
         <div class="hero__copy">
           <h1 class="hero__title reveal" style="--d: 0ms">
-            Learn any concept in <span class="hl">5 minutes</span>.
+            Learn anything by <span class="hl">teaching it</span>.
             <span class="hero__title2">Explain it. Find the gap. Teach it back.</span>
           </h1>
 
           <p class="hero__sub reveal" style="--d: 80ms">
-            Feymantec is a voice-first iOS coach that turns “I think I get it” into a clean,
-            shareable explanation you can re-teach in 60 seconds.
+            Feymantec is a guided Feynman coach. Pick a concept, explain it simply,
+            find the gaps, and lock it in.
           </p>
 
           <div class="hero__actions reveal" style="--d: 160ms">
@@ -94,52 +95,14 @@
           </div>
         </div>
 
-        <aside class="hero__aside reveal" style="--d: 200ms">
-          <div class="timerCard">
-            <div class="timer">
-              <svg class="timer__ring" viewBox="0 0 120 120" aria-hidden="true">
-                <circle class="timer__track" cx="60" cy="60" r="46"></circle>
-                <circle class="timer__prog" cx="60" cy="60" r="46"></circle>
-              </svg>
-              <div class="timer__center">
-                <p class="timer__time">5:00</p>
-              </div>
-            </div>
 
-            <div class="timerCard__body">
-              <p class="timerCard__concept" id="dailyConcept">Loading prompt…</p>
-              <p class="timerCard__micro" id="dailyMicro">
-                A random prompt. The habit is the point.
-              </p>
-
-              <div class="seg" role="tablist" aria-label="Daily prompt modes">
-                <button class="seg__btn is-on" type="button" data-daily-mode="random" role="tab">
-                  Random
-                </button>
-                <button class="seg__btn" type="button" data-daily-mode="trending" role="tab">
-                  Trending
-                </button>
-                <button class="seg__btn" type="button" data-daily-mode="for-you" role="tab">
-                  For you
-                </button>
-              </div>
-
-              <div class="timerCard__actions">
-                <a class="btn btn--solid btn--wide" href="#demo" id="dailyToDemo">Try it</a>
-                <button class="btn btn--ghost btn--wide" type="button" id="dailyShuffle">
-                  Shuffle
-                </button>
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
     </section>
 
     <section id="loop" class="section">
       <div class="shell">
         <div class="section__head">
-          <h2 class="h2">The 5-minute loop</h2>
+          <h2 class="h2">The Feynman Loop</h2>
           <p class="lead">
             You don't “study” in Feymantec. You teach. The app keeps you moving when you stall.
           </p>
@@ -150,14 +113,14 @@
             <p class="stepCard__n">01</p>
             <h3 class="stepCard__t">Pick the concept</h3>
             <p class="stepCard__p">
-              Type or speak a topic. The app gives you a clean target and a timer.
+              Type or speak a topic. The app gives you a clean target to teach.
             </p>
           </article>
           <article class="stepCard">
             <p class="stepCard__n">02</p>
             <h3 class="stepCard__t">Explain simply</h3>
             <p class="stepCard__p">
-              Talk for 2 minutes. No notes. If you reach for jargon, the coach flags it.
+              Explain in your own words. No notes. If you reach for jargon, the coach flags it.
             </p>
           </article>
           <article class="stepCard">
@@ -178,7 +141,7 @@
             <p class="stepCard__n">05</p>
             <h3 class="stepCard__t">Quick check</h3>
             <p class="stepCard__p">
-              Two questions. If you miss, the app schedules a 90-second re-teach.
+              Two questions. If you miss, the app walks you through it again until it clicks.
             </p>
           </article>
         </div>

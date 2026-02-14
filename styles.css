@@ -1729,38 +1729,189 @@ img {
   color: var(--ink);
 }
 
-.dash-main {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 48px 24px 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
+/* ── Wizard progress bar ───────────────────────────── */
+
+.wiz-progress {
+  height: 3px;
+  background: var(--paper2);
 }
 
-.dash-hero {
+.wiz-progress__bar {
+  height: 100%;
+  background: var(--hi);
+  border-radius: 0 2px 2px 0;
+  transition: width 300ms ease;
+}
+
+/* ── Wizard layout ─────────────────────────────────── */
+
+.wiz {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+}
+
+.wiz__step {
+  animation: wizFade 280ms ease;
   text-align: center;
 }
 
-.dash-hero__title {
+.wiz__step.is-hidden {
+  display: none;
+}
+
+@keyframes wizFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wiz__back {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 24px;
+  display: inline-block;
+  transition: color 120ms ease;
+}
+
+.wiz__back:hover {
+  color: var(--ink);
+}
+
+.wiz__label {
   margin: 0;
-  font-size: clamp(28px, 4vw, 40px);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hi);
+}
+
+.wiz__title {
+  margin: 12px 0 0;
+  font-size: clamp(28px, 4.5vw, 40px);
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.15;
 }
 
-.dash-hero__sub {
+.wiz__sub {
   margin: 10px 0 0;
   color: var(--muted);
   font-size: 19px;
+  line-height: 1.5;
 }
+
+/* ── Wizard inputs ─────────────────────────────────── */
+
+.wiz__field {
+  margin-top: 32px;
+  text-align: left;
+}
+
+.wiz__input {
+  display: block;
+  width: 100%;
+  padding: 16px 18px;
+  font-size: 21px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--paper2);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.wiz__input::placeholder {
+  color: var(--paper3);
+}
+
+.wiz__input:focus {
+  border-color: var(--hi);
+  box-shadow: var(--ring);
+}
+
+.wiz__textarea {
+  display: block;
+  width: 100%;
+  padding: 16px 18px;
+  font-size: 19px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--paper2);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  outline: none;
+  resize: vertical;
+  min-height: 200px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+  box-sizing: border-box;
+}
+
+.wiz__textarea::placeholder {
+  color: var(--paper3);
+}
+
+.wiz__textarea:focus {
+  border-color: var(--hi);
+  box-shadow: var(--ring);
+}
+
+.wiz__hint {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* ── Wizard button ─────────────────────────────────── */
+
+.wiz__btn {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  padding: 16px 24px;
+  font-size: 19px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #ffffff;
+  background: var(--hi);
+  border: none;
+  border-radius: 980px;
+  cursor: pointer;
+  transition: background 120ms ease, opacity 120ms ease;
+}
+
+.wiz__btn:hover {
+  background: var(--hi-hover);
+}
+
+.wiz__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.wiz__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Wizard suggestion pills ───────────────────────── */
 
 .dash-suggestions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
 .dash-pill {
@@ -1768,9 +1919,9 @@ img {
   border: 1.5px solid var(--line);
   background: var(--paper);
   color: var(--ink);
-  font-size: 14px;
+  font-size: 15px;
   font-family: inherit;
-  padding: 7px 16px;
+  padding: 8px 18px;
   border-radius: 980px;
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
@@ -1792,13 +1943,160 @@ img {
   box-shadow: var(--ring);
 }
 
-.dash-demo .demo {
-  gap: 32px;
+/* ── Wizard gaps (Step 3) ──────────────────────────── */
+
+.wiz__gaps {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
 }
 
-@media (max-width: 760px) {
-  .dash-main {
-    padding: 32px 16px 64px;
-    gap: 36px;
+.wiz__gap-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  background: var(--paper2);
+  border-radius: 12px;
+}
+
+.wiz__gap-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--hi);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wiz__gap-text {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.wiz__jargon-wrap {
+  margin-top: 24px;
+  text-align: left;
+}
+
+.wiz__jargon-wrap.is-hidden {
+  display: none;
+}
+
+.wiz__jargon-label {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.wiz__jargon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ── Wizard blocks (Step 4) ────────────────────────── */
+
+.wiz__block {
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--paper2);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.wiz__block + .wiz__block {
+  margin-top: 16px;
+}
+
+.wiz__block-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wiz__block-text {
+  margin: 8px 0 0;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* ── Wizard quiz (Step 5) ──────────────────────────── */
+
+.wiz__quiz {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.wiz__quiz-item {
+  padding: 16px;
+  background: var(--paper2);
+  border-radius: 12px;
+}
+
+.wiz__quiz-q {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.wiz__quiz-a {
+  margin: 10px 0 0;
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.5;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.wiz__quiz-a.is-hidden {
+  display: none;
+}
+
+.wiz__quiz-reveal {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--hi);
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.wiz__quiz-reveal:hover {
+  text-decoration: underline;
+}
+
+/* ── Wizard card (Final step) ──────────────────────── */
+
+.wiz__step .card {
+  margin-top: 28px;
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  .wiz {
+    padding: 36px 16px 64px;
+  }
+
+  .wiz__title {
+    font-size: 26px;
   }
 }
