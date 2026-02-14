@@ -28,6 +28,7 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 
     <link rel="stylesheet" href="styles.css" />
+    <script src="lib/feymantec-core.js" defer></script>
     <script src="config.js"></script>
     <script src="app.js" defer></script>
   </head>
@@ -43,6 +44,21 @@
           <span class="brand__tag">5-minute clarity</span>
         </a>
 
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          aria-controls="navMobile"
+          id="navToggle"
+        >
+          <span class="nav-toggle__icon" aria-hidden="true">
+            <span class="nav-toggle__line"></span>
+            <span class="nav-toggle__line"></span>
+            <span class="nav-toggle__line"></span>
+          </span>
+        </button>
+
         <nav class="nav">
           <a class="nav__link" href="#loop">How it works</a>
           <a class="nav__link" href="#demo">Demo</a>
@@ -57,6 +73,14 @@
         </div>
       </div>
     </header>
+
+    <nav class="nav-mobile" id="navMobile" aria-label="Mobile navigation">
+      <a class="nav-mobile__link" href="#loop">How it works</a>
+      <a class="nav-mobile__link" href="#demo">Demo</a>
+      <a class="nav-mobile__link" href="#pricing">Pricing</a>
+      <a class="nav-mobile__link" href="#community">Community</a>
+      <a class="nav-mobile__link" href="#waitlist">Waitlist</a>
+    </nav>
 
     <main id="main">
       <section id="top" class="hero">
@@ -84,6 +108,13 @@
               <a class="btn btn--ghost btn--big" href="#demo">
                 Try the card generator
               </a>
+            </div>
+
+            <div class="hero__proof reveal" style="--d: 300ms">
+              <span class="proof-badge">
+                <span class="proof-badge__icon" aria-hidden="true"></span>
+                <span class="proof-badge__text">Join <strong id="waitlistCount">2,400+</strong> learners on the waitlist</span>
+              </span>
             </div>
 
             <div class="hero__chips reveal" style="--d: 320ms">
@@ -228,9 +259,10 @@
                   name="explain"
                   placeholder="Talk it out. If you had to teach a smart 12-year-old, what would you say?"
                   rows="8"
+                  aria-describedby="explainMeta"
                 ></textarea>
                 <div class="metaRow">
-                  <p class="metaRow__hint" id="explainMeta">0 words</p>
+                  <p class="metaRow__hint" id="explainMeta" aria-live="polite">0 words</p>
                   <button class="btn btn--solid" type="button" id="genCard">Generate card</button>
                 </div>
               </div>
@@ -425,6 +457,7 @@
               <form class="form" id="waitlistForm">
                 <label class="label" for="email">Email</label>
                 <input
+                  type="email"
                   class="input input--big"
                   id="email"
                   name="email"
@@ -432,6 +465,7 @@
                   inputmode="email"
                   placeholder="you@domain.com"
                   required
+                  aria-describedby="waitlistErrMsg"
                 />
                 <button class="btn btn--solid btn--big btn--wide" type="submit" id="waitlistSubmit">
                   Join waitlist
@@ -442,10 +476,20 @@
               </form>
 
               <div class="result" id="waitlistResult" hidden>
-                <p class="result__t" id="waitlistTitle">You’re in.</p>
+                <p class="result__t" id="waitlistTitle">You're in!</p>
+                <div class="reward-badge">
+                  <span class="reward-badge__icon" aria-hidden="true"></span>
+                  <span>You unlocked: <strong>3 sessions/day</strong></span>
+                </div>
                 <p class="result__p" id="waitlistMsg">
-                  Share your link to unlock extra free sessions.
+                  Refer friends to unlock more free sessions at launch.
                 </p>
+                <div class="referral-progress">
+                  <div class="referral-progress__bar">
+                    <div class="referral-progress__fill" style="width: 0%"></div>
+                  </div>
+                  <p class="referral-progress__text">Refer 2 friends → unlock 5 sessions/day</p>
+                </div>
                 <div class="field">
                   <label class="label" for="refLink">Your referral link</label>
                   <div class="field__row">
@@ -465,8 +509,8 @@
                 </div>
               </div>
 
-              <div class="result result--err" id="waitlistErr" hidden>
-                <p class="result__t">Couldn’t add you (yet).</p>
+              <div class="result result--err" id="waitlistErr" hidden role="alert" aria-live="assertive">
+                <p class="result__t">Couldn't add you (yet).</p>
                 <p class="result__p" id="waitlistErrMsg">
                   This page needs Supabase configured. See README.md.
                 </p>
@@ -475,6 +519,7 @@
           </div>
 
           <div class="faq">
+            <h3 class="h3">Frequently Asked Questions</h3>
             <details class="qa">
               <summary>Is the demo “real AI”?</summary>
               <p>

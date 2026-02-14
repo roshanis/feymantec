@@ -1,31 +1,15 @@
-/* global window, document */
+/* global window, document, globalThis */
 
 function qs(sel, el = document) {
   return el.querySelector(sel);
 }
 
-function safeTrim(s) {
-  return (s || "").replace(/\s+/g, " ").trim();
+const Core = globalThis.FeymantecCore;
+if (!Core) {
+  throw new Error("Missing FeymantecCore. Load lib/feymantec-core.js before share/share.js.");
 }
 
-function escapeHtml(s) {
-  return (s || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function fromBase64Url(b64url) {
-  const b64 = (b64url || "").replaceAll("-", "+").replaceAll("_", "/");
-  const padded = b64 + "===".slice((b64.length + 3) % 4);
-  const bin = atob(padded);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  const json = new TextDecoder().decode(bytes);
-  return JSON.parse(json);
-}
+const { safeTrim, escapeHtml, decodeBase64UrlToJson } = Core;
 
 async function copyText(s) {
   try {
@@ -156,7 +140,28 @@ function drawCardToCanvas(card) {
   return canvas;
 }
 
+function updateMetaTags(card) {
+  const concept = card.concept || "Feynman Card";
+  const score = card.score ?? "—";
+  const description = `${concept} | Clarity Score: ${score}. Learn any concept in 5 minutes using the Feynman technique.`;
+
+  // Update page title
+  document.title = `${concept} | Feymantec`;
+
+  // Update OG tags
+  const ogTitle = qs("#ogTitle");
+  const ogDesc = qs("#ogDescription");
+  const twitterTitle = qs("#twitterTitle");
+  const twitterDesc = qs("#twitterDescription");
+
+  if (ogTitle) ogTitle.setAttribute("content", `${concept} | Feymantec`);
+  if (ogDesc) ogDesc.setAttribute("content", description);
+  if (twitterTitle) twitterTitle.setAttribute("content", `${concept} | Feymantec`);
+  if (twitterDesc) twitterDesc.setAttribute("content", description);
+}
+
 function renderShare(card) {
+  updateMetaTags(card);
   qs("#shareTitle").textContent = card.concept || "Untitled";
   qs("#shareScore").textContent = String(card.score ?? "—");
 
@@ -203,12 +208,34 @@ function getCardFromHash() {
   const hash = window.location.hash || "";
   const m = hash.match(/card=([A-Za-z0-9_-]+)/);
   if (!m) return null;
-  return fromBase64Url(m[1]);
+  try {
+    const card = decodeBase64UrlToJson(m[1]);
+    // Validate required fields
+    if (!card || typeof card.concept !== 'string') return null;
+    return card;
+  } catch (e) {
+    console.error("Invalid card data in URL:", e);
+    return null;
+  }
+}
+
+function renderError() {
+  qs("#shareTitle").textContent = "Invalid card link";
+  qs("#shareScore").textContent = "—";
+  qs("#shareBody").innerHTML = `
+    <div class="block">
+      <p class="block__t">Error</p>
+      <p class="block__p">This link is broken or expired. <a href="/">Create your own card</a>.</p>
+    </div>
+  `;
 }
 
 window.addEventListener("DOMContentLoaded", () => {
   const card = getCardFromHash();
-  if (!card) return;
+  if (!card) {
+    renderError();
+    return;
+  }
   renderShare(card);
 
   qs("#copyLink")?.addEventListener("click", async () => {
@@ -230,4 +257,3 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-

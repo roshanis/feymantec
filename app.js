@@ -1,4 +1,4 @@
-/* global window, document */
+/* global window, document, globalThis */
 
 function qs(sel, el = document) {
   return el.querySelector(sel);
@@ -8,33 +8,13 @@ function qsa(sel, el = document) {
   return Array.from(el.querySelectorAll(sel));
 }
 
-function clamp(n, lo, hi) {
-  return Math.min(hi, Math.max(lo, n));
+const Core = globalThis.FeymantecCore;
+if (!Core) {
+  throw new Error("Missing FeymantecCore. Load lib/feymantec-core.js before app.js.");
 }
 
-function safeTrim(s) {
-  return (s || "").replace(/\s+/g, " ").trim();
-}
-
-function wordCount(s) {
-  const t = safeTrim(s);
-  if (!t) return 0;
-  return t.split(" ").length;
-}
-
-function isLikelyNSFW(s) {
-  const t = (s || "").toLowerCase();
-  return /\b(porn|xxx|nude|nudes|onlyfans|hardcore|hentai|blowjob|sex tape)\b/i.test(t);
-}
-
-function randomId(len = 10) {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let out = "";
-  const bytes = new Uint8Array(len);
-  crypto.getRandomValues(bytes);
-  for (let i = 0; i < len; i++) out += chars[bytes[i] % chars.length];
-  return out;
-}
+const { safeTrim, wordCount, isLikelyNSFW, randomId, escapeHtml, buildPreviewCard, encodeJsonToBase64Url, toSharePayload } =
+  Core;
 
 function getParams() {
   const u = new URL(window.location.href);
@@ -47,18 +27,6 @@ function setTopbarElevate() {
   if (!bar) return;
   const on = window.scrollY > 10;
   bar.setAttribute("data-elevate", on ? "on" : "off");
-}
-
-function toBase64Url(obj) {
-  const json = JSON.stringify(obj);
-  const bytes = new TextEncoder().encode(json);
-  let bin = "";
-  bytes.forEach((b) => (bin += String.fromCharCode(b)));
-  const b64 = btoa(bin)
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replaceAll("=", "");
-  return b64;
 }
 
 function getDailyPools() {
@@ -160,77 +128,6 @@ function initDaily5() {
   };
 }
 
-function buildPreviewCard(concept, v1) {
-  const wc = wordCount(v1);
-  const lc = safeTrim(v1).length;
-
-  const lower = (v1 || "").toLowerCase();
-  const hasExample = /\b(for example|e\.g\.|like|such as|imagine|say)\b/.test(lower) || /\d/.test(lower);
-  const hasBecause = /\b(because|therefore|so that|which means|as a result)\b/.test(lower);
-  const vague = /\b(stuff|things|basically|just|somehow|kind of|sort of)\b/.test(lower);
-
-  const words = safeTrim(v1).split(" ").filter(Boolean);
-  const jargon = [];
-  for (const w of words) {
-    const clean = w.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, "");
-    if (!clean) continue;
-    if (clean.length >= 12) jargon.push(clean);
-    else if (/^[A-Z]{2,}$/.test(clean)) jargon.push(clean);
-    else if (/[A-Z].*[A-Z]/.test(clean)) jargon.push(clean);
-  }
-  const uniqJargon = Array.from(new Set(jargon)).slice(0, 8);
-
-  let score = 86;
-  score -= clamp(uniqJargon.length * 2, 0, 14);
-  if (!hasExample) score -= 8;
-  if (!hasBecause) score -= 4;
-  if (vague) score -= 5;
-  if (wc < 25) score -= 8;
-  if (wc > 180) score -= 6;
-  if (lc < 60) score -= 6;
-  score = clamp(score, 42, 96);
-
-  const gaps = [];
-  if (uniqJargon.length) gaps.push(`Define “${uniqJargon[0]}” in one sentence, without synonyms.`);
-  if (!hasExample) gaps.push("Give one concrete example with numbers or a real situation.");
-  if (!hasBecause) gaps.push("Add the missing ‘because’: what causes what, step-by-step?");
-  if (vague) gaps.push("Replace vague words (stuff/things/basically/just) with a specific mechanism.");
-  while (gaps.length < 3) gaps.push("What’s the smallest version of this that is still true?");
-  const gapsOut = gaps.slice(0, 4);
-
-  const simple = [
-    `Here’s the plain idea: ${concept} is a way to connect cause and effect in a predictable way.`,
-    `Start with the pieces. Name what you’re trying to predict, and what evidence you have.`,
-    `Then explain how the evidence changes your belief, not by vibes, but by a rule.`,
-    `If you can’t do it with a tiny example, you don’t have it yet.`,
-    `The goal is a sentence you could say out loud without pausing.`,
-  ];
-
-  const analogy = `Think of ${concept} like a “belief thermostat”: when new evidence comes in, you turn the dial up or down by a specific amount instead of guessing.`;
-
-  const quiz = [
-    {
-      q: "If your explanation has no example, what should you add first?",
-      a: "A concrete situation with numbers or a specific story.",
-    },
-    {
-      q: "What’s a red flag for fake understanding?",
-      a: "Using jargon to skip the steps that connect one idea to the next.",
-    },
-  ];
-
-  return {
-    concept,
-    v1: safeTrim(v1),
-    score,
-    jargon: uniqJargon,
-    gaps: gapsOut,
-    simple,
-    analogy,
-    quiz,
-  };
-}
-
 function renderCard(card) {
   qs("#cardTitle").textContent = card.concept || "Untitled";
   qs("#clarityScore").textContent = String(card.score);
@@ -294,15 +191,6 @@ function renderCard(card) {
   qs("#cardFoot").hidden = false;
 }
 
-function escapeHtml(s) {
-  return (s || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 function setConceptSuggestions(setConcept) {
   const el = qs("#conceptSuggest");
   if (!el) return;
@@ -335,15 +223,7 @@ function updateExplainMeta() {
 }
 
 function buildShareHref(card) {
-  const b64 = toBase64Url({
-    concept: card.concept,
-    score: card.score,
-    v1: card.v1.slice(0, 700),
-    gaps: card.gaps,
-    simple: card.simple,
-    analogy: card.analogy,
-    quiz: card.quiz,
-  });
+  const b64 = encodeJsonToBase64Url(toSharePayload(card));
   return `share/index.html#card=${b64}`;
 }
 
@@ -642,10 +522,21 @@ function initWaitlist() {
 
   const cfg = getConfig();
   const params = getParams();
-  const storedRef = safeTrim(localStorage.getItem("feym_ref") || "");
+  let storedRef = "";
+  try {
+    storedRef = safeTrim(localStorage.getItem("feym_ref") || "");
+  } catch {
+    // Private browsing - ignore
+  }
   const urlRef = safeTrim(params.ref || "");
   const referredBy = urlRef || storedRef;
-  if (urlRef) localStorage.setItem("feym_ref", urlRef);
+  if (urlRef) {
+    try {
+      localStorage.setItem("feym_ref", urlRef);
+    } catch {
+      // Private browsing - ignore
+    }
+  }
 
   const submit = qs("#waitlistSubmit");
   const result = qs("#waitlistResult");
@@ -742,8 +633,12 @@ function initWaitlist() {
       }
       if (!ok) throw new Error("Could not generate a unique referral code. Try again.");
 
-      localStorage.setItem("feym_waitlist_ref", code);
-      localStorage.setItem("feym_waitlist_email", email);
+      try {
+        localStorage.setItem("feym_waitlist_ref", code);
+        localStorage.setItem("feym_waitlist_email", email);
+      } catch {
+        // Private browsing or storage full - continue anyway
+      }
 
       const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(code)}`;
       showOk(link);
@@ -751,8 +646,14 @@ function initWaitlist() {
     } catch (err) {
       const msg = err?.message || "Could not add you. Try again.";
       if (msg.includes("already on the waitlist")) {
-        const storedEmail = safeTrim(localStorage.getItem("feym_waitlist_email") || "").toLowerCase();
-        const storedCode = safeTrim(localStorage.getItem("feym_waitlist_ref") || "");
+        let storedEmail = "";
+        let storedCode = "";
+        try {
+          storedEmail = safeTrim(localStorage.getItem("feym_waitlist_email") || "").toLowerCase();
+          storedCode = safeTrim(localStorage.getItem("feym_waitlist_ref") || "");
+        } catch {
+          // Private browsing - ignore
+        }
         if (storedEmail && storedEmail === email && storedCode) {
           const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(storedCode)}`;
           showOk(link);
@@ -768,6 +669,55 @@ function initWaitlist() {
         submit.disabled = false;
         submit.textContent = "Join waitlist";
       }
+    }
+  });
+}
+
+function initMobileNav() {
+  const toggle = qs("#navToggle");
+  const mobileNav = qs("#navMobile");
+  if (!toggle || !mobileNav) return;
+
+  function closeNav() {
+    toggle.setAttribute("aria-expanded", "false");
+    mobileNav.classList.remove("is-open");
+  }
+
+  function openNav() {
+    toggle.setAttribute("aria-expanded", "true");
+    mobileNav.classList.add("is-open");
+  }
+
+  toggle.addEventListener("click", () => {
+    const isOpen = toggle.getAttribute("aria-expanded") === "true";
+    if (isOpen) {
+      closeNav();
+    } else {
+      openNav();
+    }
+  });
+
+  // Close nav when clicking a link
+  qsa(".nav-mobile__link").forEach((link) => {
+    link.addEventListener("click", closeNav);
+  });
+
+  // Close nav on escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && mobileNav.classList.contains("is-open")) {
+      closeNav();
+      toggle.focus();
+    }
+  });
+
+  // Close nav when clicking outside
+  document.addEventListener("click", (e) => {
+    if (
+      mobileNav.classList.contains("is-open") &&
+      !mobileNav.contains(e.target) &&
+      !toggle.contains(e.target)
+    ) {
+      closeNav();
     }
   });
 }
@@ -795,6 +745,7 @@ window.addEventListener("scroll", setTopbarElevate, { passive: true });
 setTopbarElevate();
 
 window.addEventListener("DOMContentLoaded", () => {
+  initMobileNav();
   initSmoothScroll();
   initYear();
   const daily = initDaily5();
