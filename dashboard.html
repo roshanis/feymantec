@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+
+  <title>Feymantec</title>
+  <meta name="description" content="Your daily Feynman practice." />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="lib/feymantec-core.js" defer></script>
+  <script src="lib/feymantec-supabase.js" defer></script>
+  <script src="config.js"></script>
+  <script src="app.js" defer></script>
+  <script src="dashboard.js" defer></script>
+</head>
+
+<body class="dash-page">
+
+  <!-- Minimal topbar -->
+  <header class="dash-topbar">
+    <a class="brand" href="/dashboard.html" aria-label="Feymantec home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__name">Feymantec</span>
+    </a>
+    <button class="dash-topbar__signout" type="button" id="signOut">Sign out</button>
+  </header>
+
+  <main class="dash-main">
+
+    <div class="dash-hero">
+      <h1 class="dash-hero__title">What will you teach today?</h1>
+      <p class="dash-hero__sub">Pick a concept, explain it simply, and find the gaps.</p>
+    </div>
+
+    <!-- Demo card generator -->
+    <div class="dash-demo">
+      <div class="demo">
+        <div class="demo__input">
+          <div class="field">
+            <label class="label" for="concept">Concept</label>
+            <input class="input" id="concept" name="concept" autocomplete="off"
+              placeholder="e.g. Bayes' theorem" maxlength="80" />
+            <div class="dash-suggestions" id="dashSuggestions" aria-label="Suggested concepts"></div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="explain">Your explanation (v1)</label>
+            <textarea class="textarea" id="explain" name="explain"
+              placeholder="Talk it out. If you had to teach a smart 12-year-old, what would you say?" rows="8"
+              aria-describedby="explainMeta"></textarea>
+            <div class="metaRow">
+              <p class="metaRow__hint" id="explainMeta" aria-live="polite">0 words</p>
+              <button class="btn btn--solid" type="button" id="genCard">Generate card</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo__out is-hidden" id="demoOut" aria-live="polite">
+          <div class="card" id="cardOut">
+            <div class="card__head">
+              <div>
+                <p class="card__k">Feynman Card</p>
+                <h3 class="card__t" id="cardTitle"></h3>
+              </div>
+              <div class="score" aria-label="Clarity score">
+                <p class="score__n" id="clarityScore">—</p>
+                <p class="score__l">Clarity</p>
+              </div>
+            </div>
+
+            <div class="card__body" id="cardBody"></div>
+
+            <div class="card__foot" id="cardFoot" hidden>
+              <a class="btn btn--ghost" id="shareLink" href="share/index.html" target="_blank" rel="noreferrer">
+                Open share page
+              </a>
+              <button class="btn btn--ghost" type="button" id="copyShare">
+                Copy share link
+              </button>
+              <button class="btn btn--solid" type="button" id="downloadPng">
+                Download PNG
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+</body>
+</html>

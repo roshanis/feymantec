@@ -28,6 +28,7 @@ Then visit `http://localhost:5173`.
 2. In the SQL editor, run:
    - `supabase/migrations/0001_waitlist.sql`
    - `supabase/migrations/0002_waitlist_auth.sql`
+   - `supabase/migrations/0003_waitlist_referral_count.sql`
 3. Edit `config.js` and fill in:
    - `supabaseUrl`
    - `supabaseAnonKey`

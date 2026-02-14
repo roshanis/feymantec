@@ -194,6 +194,10 @@ function renderCard(card) {
 
   qs("#cardBody").innerHTML = blocks.join("");
   qs("#cardFoot").hidden = false;
+
+  // Reveal the card output container (hidden on dashboard until first generation)
+  const demoOut = qs("#demoOut");
+  if (demoOut) demoOut.classList.remove("is-hidden");
 }
 
 function setConceptSuggestions(setConcept) {
@@ -381,6 +385,26 @@ function initDemo(daily) {
   const explainEl = qs("#explain");
   const genBtn = qs("#genCard");
   const fillDaily = qs("#fillDaily");
+  const shareA = qs("#shareLink");
+  const copyShare = qs("#copyShare");
+  const dl = qs("#downloadPng");
+  const shareHint = qs("#shareHint");
+
+  function setShareState(enabled, hintText = "") {
+    if (shareA) {
+      if (enabled) {
+        shareA.setAttribute("aria-disabled", "false");
+      } else {
+        shareA.setAttribute("aria-disabled", "true");
+      }
+    }
+    if (copyShare) copyShare.disabled = !enabled;
+    if (dl) dl.disabled = !enabled;
+    if (shareHint) {
+      shareHint.hidden = enabled;
+      shareHint.textContent = hintText || "Generate a card to enable sharing.";
+    }
+  }
 
   function setConcept(v) {
     if (!conceptEl) return;
@@ -403,6 +427,7 @@ function initDemo(daily) {
 
   if (explainEl) explainEl.addEventListener("input", updateExplainMeta);
   updateExplainMeta();
+  setShareState(false);
 
   let lastCard = null;
 
@@ -420,9 +445,9 @@ function initDemo(daily) {
     renderCard(card);
 
     const href = buildShareHref(card);
-    const shareA = qs("#shareLink");
     if (shareA) shareA.href = href;
-    qs("#copyShare")?.setAttribute("data-share-href", new URL(href, window.location.href).toString());
+    if (copyShare) copyShare.setAttribute("data-share-href", new URL(href, window.location.href).toString());
+    setShareState(true);
   }
 
   if (genBtn) {
@@ -434,22 +459,26 @@ function initDemo(daily) {
         qs("#clarityScore").textContent = "—";
         qs("#cardBody").innerHTML = `<p class="muted">${escapeHtml(e?.message || "Couldn’t generate a card.")}</p>`;
         qs("#cardFoot").hidden = true;
+        if (shareA) shareA.removeAttribute("href");
+        if (copyShare) copyShare.removeAttribute("data-share-href");
+        setShareState(false, "Generate a valid card first, then share or download.");
       }
     });
   }
 
-  const copyShare = qs("#copyShare");
   if (copyShare) {
     copyShare.addEventListener("click", async () => {
       const href = copyShare.getAttribute("data-share-href") || "";
-      if (!href) return;
+      if (!href) {
+        setShareState(false, "Generate a card first to create a shareable link.");
+        return;
+      }
       const ok = await copyText(href);
       copyShare.textContent = ok ? "Copied" : "Copy failed";
       window.setTimeout(() => (copyShare.textContent = "Copy share link"), 1200);
     });
   }
 
-  const dl = qs("#downloadPng");
   if (dl) {
     dl.addEventListener("click", async () => {
       if (!lastCard) return;
@@ -458,6 +487,15 @@ function initDemo(daily) {
         await downloadPngFromCard(lastCard);
       } finally {
         dl.textContent = "Download PNG";
+      }
+    });
+  }
+
+  if (shareA) {
+    shareA.addEventListener("click", (e) => {
+      if (shareA.getAttribute("aria-disabled") === "true") {
+        e.preventDefault();
+        setShareState(false, "Generate a card first to open the share page.");
       }
     });
   }
@@ -518,11 +556,34 @@ function initWaitlist() {
   const otpEl = qs("#otpCode");
   const otpResend = qs("#otpResend");
   const otpChangeEmail = qs("#otpChangeEmail");
+  const recoverBtn = qs("#recoverWaitlist");
+  const refProgressFill = qs("#refProgressFill");
+  const refProgressText = qs("#refProgressText");
 
   function showErr(message) {
     if (errBox) errBox.hidden = false;
     if (result) result.hidden = true;
     if (errMsg) errMsg.textContent = message;
+  }
+
+  async function fetchReferralCount(accessToken, refCode) {
+    if (!accessToken || !refCode) return null;
+    const cfg = getConfig();
+    const endpoint = `${cfg.supabaseUrl.replace(/\/+$/, "")}/rest/v1/rpc/waitlist_referral_count`;
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        apikey: cfg.supabaseAnonKey,
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ref: refCode }),
+    });
+    if (!res.ok) throw new Error("Could not load referral count.");
+    const value = await res.json();
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 0) return null;
+    return Math.floor(n);
   }
 
   function showOk(link) {
@@ -536,6 +597,31 @@ function initWaitlist() {
         `I’m on the Feymantec TestFlight waitlist. Join me: ${link}`
       )}`
     );
+  }
+
+  function setReferralProgress(current, goal) {
+    const safeGoal = Math.max(1, Number(goal) || 1);
+    const safeCurrent = Math.max(0, Number(current) || 0);
+    const pct = Math.min(100, Math.round((safeCurrent / safeGoal) * 100));
+    if (refProgressFill) refProgressFill.style.width = `${pct}%`;
+    if (refProgressText) {
+      const left = Math.max(0, safeGoal - safeCurrent);
+      refProgressText.textContent =
+        left > 0
+          ? `${safeCurrent}/${safeGoal} referrals tracked. Refer ${left} more ${left === 1 ? "friend" : "friends"} to unlock 5 sessions/day.`
+          : `${safeCurrent}/${safeGoal} referrals tracked. 5 sessions/day unlocked.`;
+    }
+  }
+
+  async function showOkWithProgress({ link, accessToken = "", refCode = "" }) {
+    showOk(link);
+    setReferralProgress(0, 2);
+    try {
+      const n = await fetchReferralCount(accessToken, refCode);
+      if (n !== null) setReferralProgress(n, 2);
+    } catch {
+      // Leave baseline progress when RPC is not deployed yet.
+    }
   }
 
   qs("#copyRef")?.addEventListener("click", async () => {
@@ -637,6 +723,14 @@ function initWaitlist() {
     if (emailEl) emailEl.focus();
   });
 
+  recoverBtn?.addEventListener("click", () => {
+    form.hidden = false;
+    if (result) result.hidden = true;
+    if (errBox) errBox.hidden = true;
+    setStep("email");
+    if (emailEl) emailEl.focus();
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (submit) {
@@ -684,7 +778,7 @@ function initWaitlist() {
         }
 
         const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(refCode)}`;
-        showOk(link);
+        await showOkWithProgress({ link, accessToken, refCode });
         form.hidden = true;
       }
     } catch (err) {
@@ -703,9 +797,12 @@ function initWaitlist() {
         if (storedEmail && storedEmail === email && storedCode) {
           const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(storedCode)}`;
           showOk(link);
+          setReferralProgress(0, 2);
           form.hidden = true;
         } else {
-          showErr(`${msg} If you signed up on a different device, sign in again to retrieve your link.`);
+          form.hidden = false;
+          setStep("email");
+          showErr("You are already on the waitlist. Send a fresh code, then verify to retrieve your referral link.");
         }
       } else {
         showErr(msg);

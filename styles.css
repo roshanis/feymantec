@@ -41,7 +41,7 @@ body {
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--paper2);
   overflow-x: hidden;
 }
 
@@ -349,6 +349,13 @@ img {
 
 .btn--solid:hover {
   background: var(--hi-hover);
+}
+
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* ── Hero ───────────────────────────────────────────── */
@@ -682,6 +689,19 @@ img {
 .demo__out {
   display: grid;
   gap: 24px;
+}
+
+.demo__out.is-hidden {
+  display: none;
+}
+
+.demo__out {
+  animation: fadeIn 300ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .field {
@@ -1172,6 +1192,10 @@ img {
   background: rgba(255, 59, 48, 0.06);
 }
 
+.result--err .btn {
+  margin-top: 12px;
+}
+
 .result__t {
   margin: 0;
   font-size: 28px;
@@ -1357,5 +1381,424 @@ img {
 
   .shareRow2 {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ── Login page ────────────────────────────────────── */
+
+.login-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  padding: 24px;
+}
+
+.login {
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.login__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ink);
+  margin-bottom: 48px;
+}
+
+.login__brand .brand__mark {
+  width: 40px;
+  height: 40px;
+}
+
+.login__brand .brand__name {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.login__step {
+  transition: opacity 200ms ease;
+}
+
+.login__step.is-hidden {
+  display: none;
+}
+
+.login__title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.login__sub {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.login__sub strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.login__field {
+  margin-top: 32px;
+  text-align: left;
+}
+
+.login__label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.login__input {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 19px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--paper2);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+  box-sizing: border-box;
+}
+
+.login__input::placeholder {
+  color: var(--paper3);
+}
+
+.login__input:focus {
+  border-color: var(--hi);
+  box-shadow: var(--ring);
+}
+
+.login__input--otp {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  padding: 16px;
+  font-family: var(--mono);
+}
+
+.login__btn {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px 24px;
+  font-size: 17px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #ffffff;
+  background: var(--hi);
+  border: none;
+  border-radius: 980px;
+  cursor: pointer;
+  transition: background 120ms ease, opacity 120ms ease;
+}
+
+.login__btn:hover {
+  background: var(--hi-hover);
+}
+
+.login__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.login__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.login__btn.is-loading {
+  position: relative;
+  color: transparent;
+}
+
+.login__btn.is-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: loginSpin 600ms linear infinite;
+}
+
+@keyframes loginSpin {
+  to { transform: rotate(360deg); }
+}
+
+.login__error {
+  margin: 14px 0 0;
+  font-size: 15px;
+  color: var(--hot);
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.login__error.is-visible {
+  opacity: 1;
+}
+
+.login__link {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--hi);
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.login__link:hover {
+  text-decoration: underline;
+}
+
+.login__check {
+  margin-bottom: 20px;
+}
+
+.login__footer {
+  margin-top: 48px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.login__footer a {
+  color: var(--hi);
+  text-decoration: none;
+}
+
+.login__footer a:hover {
+  text-decoration: underline;
+}
+
+/* ── Login: divider ──────────────────────────────── */
+
+.login__divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 28px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.login__divider::before,
+.login__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* ── Login: social buttons ───────────────────────── */
+
+.login__social {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login__social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: 980px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.login__social-btn:hover {
+  background: var(--paper2);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.login__social-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.login__social-btn svg {
+  flex-shrink: 0;
+}
+
+/* ── Login: OTP hint ─────────────────────────────── */
+
+.login__hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── Login: resend ───────────────────────────────── */
+
+.login__resend {
+  margin: 20px 0 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.login__countdown {
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.login__link.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* ── Login: error with links ─────────────────────── */
+
+.login__error a {
+  color: var(--hi);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login__error a:hover {
+  text-decoration: underline;
+}
+
+/* ── Dashboard page ────────────────────────────────── */
+
+.dash-page {
+  min-height: 100dvh;
+  background: var(--paper);
+}
+
+.dash-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dash-topbar__signout {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.dash-topbar__signout:hover {
+  background: var(--paper2);
+  color: var(--ink);
+}
+
+.dash-main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.dash-hero {
+  text-align: center;
+}
+
+.dash-hero__title {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.dash-hero__sub {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 19px;
+}
+
+.dash-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dash-pill {
+  appearance: none;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+  padding: 7px 16px;
+  border-radius: 980px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.dash-pill:hover {
+  background: var(--paper2);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.dash-pill.is-on {
+  background: var(--hi);
+  border-color: var(--hi);
+  color: #ffffff;
+}
+
+.dash-pill:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.dash-demo .demo {
+  gap: 32px;
+}
+
+@media (max-width: 760px) {
+  .dash-main {
+    padding: 32px 16px 64px;
+    gap: 36px;
   }
 }

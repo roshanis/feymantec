@@ -8,7 +8,7 @@
 
   <title>Feymantec | Learn Any Concept in 5 Minutes</title>
   <meta name="description"
-    content="A 5-minute Feynman coach: explain simply, find your gaps, and lock it in. Join the TestFlight waitlist." />
+    content="A 5-minute Feynman coach: explain simply, find your gaps, and lock it in. Sign up free." />
 
   <meta property="og:title" content="Feymantec" />
   <meta property="og:description"
@@ -50,11 +50,13 @@
         <a class="nav__link" href="#loop">How it works</a>
         <a class="nav__link" href="#demo">Demo</a>
         <a class="nav__link" href="#pricing">Pricing</a>
-        <a class="nav__link" href="#waitlist">Waitlist</a>
+        <a class="nav__link" href="/signup.html">Sign up</a>
+        <a class="nav__link" href="/login.html">Log in</a>
       </nav>
 
       <div class="topbar__cta">
-        <a class="btn btn--solid" href="#waitlist">Join Waitlist</a>
+        <a class="btn btn--ghost" href="/login.html">Log in</a>
+        <a class="btn btn--solid" href="/signup.html">Sign up</a>
       </div>
     </div>
   </header>
@@ -63,7 +65,8 @@
     <a class="nav-mobile__link" href="#loop">How it works</a>
     <a class="nav-mobile__link" href="#demo">Demo</a>
     <a class="nav-mobile__link" href="#pricing">Pricing</a>
-    <a class="nav-mobile__link" href="#waitlist">Waitlist</a>
+    <a class="nav-mobile__link" href="/signup.html">Sign up</a>
+    <a class="nav-mobile__link" href="/login.html">Log in</a>
   </nav>
 
   <main id="main">
@@ -82,8 +85,8 @@
           </p>
 
           <div class="hero__actions reveal" style="--d: 160ms">
-            <a class="btn btn--solid btn--big" href="#waitlist">
-              Join the Waitlist
+            <a class="btn btn--solid btn--big" href="/signup.html">
+              Sign up free
             </a>
             <a class="btn btn--ghost btn--big" href="#demo">
               Try the Demo
@@ -187,8 +190,8 @@
         <div class="section__head">
           <h2 class="h2">Try the Card Generator</h2>
           <p class="lead">
-            This is a local preview for the landing page. The iOS app will run a real AI coach and
-            save cards to your profile.
+            This is a local preview for the landing page. It uses lightweight on-device heuristics.
+            The iOS app will run a real AI coach and save cards to your profile.
           </p>
         </div>
 
@@ -215,6 +218,9 @@
                 <p class="metaRow__hint" id="explainMeta" aria-live="polite">0 words</p>
                 <button class="btn btn--solid" type="button" id="genCard">Generate card</button>
               </div>
+              <p class="metaRow__hint">
+                Tip: write 2-3 plain-language sentences so the preview can find your gaps.
+              </p>
             </div>
 
           </div>
@@ -239,16 +245,20 @@
               </div>
 
               <div class="card__foot" id="cardFoot" hidden>
-                <a class="btn btn--ghost" id="shareLink" href="share/index.html" target="_blank" rel="noreferrer">
+                <a class="btn btn--ghost" id="shareLink" href="share/index.html" target="_blank" rel="noreferrer"
+                  aria-disabled="true">
                   Open share page
                 </a>
-                <button class="btn btn--ghost" type="button" id="copyShare">
+                <button class="btn btn--ghost" type="button" id="copyShare" disabled>
                   Copy share link
                 </button>
                 <button class="btn btn--solid" type="button" id="downloadPng">
                   Download PNG
                 </button>
               </div>
+              <p class="metaRow__hint" id="shareHint" hidden>
+                Generate a card to enable sharing.
+              </p>
             </div>
 
           </div>
@@ -278,7 +288,7 @@
               <li>Share links</li>
               <li>Basic quizzes</li>
             </ul>
-            <a class="btn btn--ghost btn--wide" href="#waitlist">Join waitlist</a>
+            <a class="btn btn--ghost btn--wide" href="/signup.html">Sign up free</a>
           </article>
 
           <article class="plan plan--pro">
@@ -295,7 +305,7 @@
               <li>Learning paths (prerequisite chains)</li>
               <li>Advanced quizzes + explanations</li>
             </ul>
-            <a class="btn btn--solid btn--wide" href="#waitlist">Get early pricing</a>
+            <a class="btn btn--solid btn--wide" href="/signup.html">Get started</a>
           </article>
         </div>
         <p class="fine">
@@ -398,9 +408,11 @@
               </p>
               <div class="referral-progress">
                 <div class="referral-progress__bar">
-                  <div class="referral-progress__fill" style="width: 0%"></div>
+                  <div class="referral-progress__fill" id="refProgressFill"></div>
                 </div>
-                <p class="referral-progress__text">Refer 2 friends → unlock 5 sessions/day</p>
+                <p class="referral-progress__text" id="refProgressText">
+                  0/2 referrals tracked. Refer 2 friends to unlock 5 sessions/day.
+                </p>
               </div>
               <div class="field">
                 <label class="label" for="refLink">Your referral link</label>
@@ -426,6 +438,9 @@
               <p class="result__p" id="waitlistErrMsg">
                 This page needs Supabase configured. See README.md.
               </p>
+              <button class="btn btn--ghost" type="button" id="recoverWaitlist">
+                Recover referral link
+              </button>
             </div>
           </div>
         </div>
