@@ -1,0 +1,446 @@
+/* Dashboard-specific styles */
+
+/* ── Nav for dashboard ─────────────────────────────── */
+.nav--dash {
+  display: flex;
+}
+
+.nav__link--active {
+  color: var(--hi);
+  font-weight: 600;
+}
+
+/* ── Avatar button ─────────────────────────────────── */
+.avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--paper);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.avatar-btn:hover {
+  background: var(--paper2);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--aqua), var(--hot));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 14px;
+}
+
+.avatar-btn__name {
+  color: var(--ink);
+}
+
+/* ── User menu dropdown ────────────────────────────── */
+.user-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow2);
+  min-width: 180px;
+  padding: 8px 0;
+  z-index: 100;
+}
+
+.user-menu__item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.user-menu__item:hover {
+  background: var(--paper2);
+}
+
+.user-menu__divider {
+  margin: 8px 0;
+  border: none;
+  border-top: 1px solid var(--line);
+}
+
+/* ── Dashboard main ────────────────────────────────── */
+.dash-main {
+  min-height: calc(100vh - 52px - 60px);
+  padding: 32px 0;
+}
+
+/* ── Loading state ─────────────────────────────────── */
+.dash-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+  color: var(--muted);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--line);
+  border-top-color: var(--hi);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Auth required state ───────────────────────────── */
+.dash-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.dash-auth__inner {
+  text-align: center;
+  max-width: 400px;
+}
+
+.dash-auth__inner h1 {
+  font-family: var(--display);
+  font-size: 28px;
+  margin: 0 0 12px;
+}
+
+.dash-auth__inner p {
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+/* ── Empty state ───────────────────────────────────── */
+.dash-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.dash-empty__inner {
+  text-align: center;
+  max-width: 480px;
+}
+
+.dash-empty__icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0, 203, 184, 0.2), rgba(255, 77, 115, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-empty__icon::before {
+  content: "🎓";
+  font-size: 36px;
+}
+
+.dash-empty__inner h1 {
+  font-family: var(--display);
+  font-size: 32px;
+  margin: 0 0 12px;
+}
+
+.dash-empty__inner > p {
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+.dash-empty__steps {
+  margin-top: 32px;
+  text-align: left;
+  padding: 20px 24px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.dash-empty__steps ol {
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
+.dash-empty__steps li {
+  margin: 8px 0;
+  color: var(--muted);
+}
+
+/* ── Dashboard content ─────────────────────────────── */
+.dash-content {
+  animation: fadeIn 300ms ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Dashboard header ──────────────────────────────── */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.dash-header__greeting {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ── Stats row ─────────────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 600px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+}
+
+.stat-card__icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.stat-card__icon--streak {
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+}
+
+.stat-card__icon--streak::before {
+  content: "🔥";
+}
+
+.stat-card__icon--cards {
+  background: linear-gradient(135deg, var(--aqua), #00a896);
+}
+
+.stat-card__icon--cards::before {
+  content: "📚";
+}
+
+.stat-card__icon--clarity {
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+}
+
+.stat-card__icon--clarity::before {
+  content: "📊";
+}
+
+.stat-card__value {
+  font-family: var(--display);
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.stat-card__label {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+.stat-card__sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+
+/* ── Dashboard sections ────────────────────────────── */
+.dash-section {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.dash-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.dash-section__title {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ── Daily prompt ──────────────────────────────────── */
+.daily-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(0, 203, 184, 0.08), rgba(255, 227, 90, 0.08));
+  border-radius: 12px;
+}
+
+.daily-prompt__text {
+  flex: 1;
+  margin: 0;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+@media (max-width: 600px) {
+  .daily-prompt {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ── Review queue ──────────────────────────────────── */
+.review-queue {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.review-card {
+  padding: 16px;
+  background: var(--paper2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow2);
+}
+
+.review-card__concept {
+  font-weight: 600;
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.review-card__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.review-card__score {
+  font-family: var(--mono);
+}
+
+.review-card__due {
+  color: var(--hi);
+}
+
+/* ── Recent cards ──────────────────────────────────── */
+.recent-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--paper2);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 150ms ease;
+}
+
+.recent-card:hover {
+  background: var(--paper3);
+}
+
+.recent-card__concept {
+  font-weight: 600;
+  margin: 0;
+}
+
+.recent-card__meta {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.recent-card__score {
+  font-family: var(--mono);
+}
+
+/* ── Button sizes ──────────────────────────────────── */
+.btn--sm {
+  padding: 6px 12px;
+  font-size: 14px;
+}

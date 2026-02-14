@@ -836,6 +836,17 @@ img {
   gap: 24px;
 }
 
+.demo__mode-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn--sm {
+  padding: 8px 14px;
+  font-size: 15px;
+}
+
 .demo__out.is-hidden {
   display: none;
 }

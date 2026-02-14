@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="robots" content="noindex" />
+
+    <title>Welcome | Feymantec</title>
+    <meta name="description" content="Create your first Feynman Card and start your learning journey." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="onboarding.css" />
+    <script src="lib/feymantec-core.js" defer></script>
+    <script src="lib/feymantec-supabase.js" defer></script>
+    <script src="config.js"></script>
+    <script src="onboarding.js" defer></script>
+  </head>
+
+  <body class="onboard-page">
+    <!-- Progress bar -->
+    <div class="onboard-progress" aria-hidden="true">
+      <div class="onboard-progress__bar" id="progressBar" style="width: 20%"></div>
+    </div>
+
+    <main class="onboard">
+      <!-- Step 1: Welcome -->
+      <section class="onboard__step" id="step1" data-step="1">
+        <div class="onboard__icon" aria-hidden="true"></div>
+        <h1 class="onboard__title">Welcome to Feymantec!</h1>
+        <p class="onboard__sub">
+          You're about to learn the most effective way to truly understand any concept.
+        </p>
+
+        <div class="onboard__method">
+          <p class="onboard__method-title">The Feynman Technique:</p>
+          <ol class="onboard__method-list">
+            <li>Pick a concept</li>
+            <li>Explain it simply</li>
+            <li>Find your gaps</li>
+            <li>Simplify & refine</li>
+          </ol>
+        </div>
+
+        <button class="btn btn--solid btn--big onboard__cta" type="button" id="startBtn">
+          Let's Create Your First Card
+        </button>
+
+        <div class="onboard__steps" aria-label="Step 1 of 5">
+          <span class="onboard__dot onboard__dot--active"></span>
+          <span class="onboard__dot"></span>
+          <span class="onboard__dot"></span>
+          <span class="onboard__dot"></span>
+          <span class="onboard__dot"></span>
+        </div>
+      </section>
+
+      <!-- Step 2: Choose Topic -->
+      <section class="onboard__step onboard__step--hidden" id="step2" data-step="2">
+        <p class="onboard__label">Step 1 of 4: Choose a Concept</p>
+        <h1 class="onboard__title">What do you want to understand?</h1>
+        <p class="onboard__sub">
+          Pick something you think you already know. We'll help you discover what you might be missing.
+        </p>
+
+        <div class="onboard__suggestions" id="suggestions">
+          <!-- Radio buttons will be inserted here -->
+        </div>
+
+        <div class="onboard__custom">
+          <label class="label" for="customConcept">Or type your own:</label>
+          <input
+            class="input"
+            id="customConcept"
+            type="text"
+            placeholder="e.g. How does photosynthesis work?"
+            maxlength="80"
+          />
+        </div>
+
+        <div class="onboard__nav">
+          <button class="btn btn--ghost" type="button" id="back2">Back</button>
+          <button class="btn btn--solid" type="button" id="next2" disabled>Continue</button>
+        </div>
+
+        <div class="onboard__steps" aria-label="Step 2 of 5">
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--active"></span>
+          <span class="onboard__dot"></span>
+          <span class="onboard__dot"></span>
+          <span class="onboard__dot"></span>
+        </div>
+      </section>
+
+      <!-- Step 3: Write Explanation -->
+      <section class="onboard__step onboard__step--hidden" id="step3" data-step="3">
+        <p class="onboard__label">Step 2 of 4: Explain It Simply</p>
+        <h1 class="onboard__title">Explain: <span id="conceptDisplay"></span></h1>
+        <p class="onboard__sub">
+          Write it like you're teaching a friend who's never heard of this. Use simple words.
+        </p>
+
+        <div class="onboard__explain">
+          <textarea
+            class="textarea"
+            id="explanation"
+            rows="8"
+            placeholder="Start writing... tip: begin with 'It's like...' or 'The basic idea is...'"
+          ></textarea>
+          <p class="onboard__wordcount" id="wordCount">0 words</p>
+        </div>
+
+        <div class="onboard__tip">
+          <strong>Tip:</strong> Aim for 50-150 words. If you get stuck, that's a gap to explore!
+        </div>
+
+        <div class="onboard__nav">
+          <button class="btn btn--ghost" type="button" id="back3">Back</button>
+          <button class="btn btn--solid" type="button" id="next3" disabled>Generate Card</button>
+        </div>
+
+        <div class="onboard__steps" aria-label="Step 3 of 5">
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--active"></span>
+          <span class="onboard__dot"></span>
+          <span class="onboard__dot"></span>
+        </div>
+      </section>
+
+      <!-- Step 4: Review Card -->
+      <section class="onboard__step onboard__step--hidden" id="step4" data-step="4">
+        <p class="onboard__label">Step 3 of 4: Your Feynman Card</p>
+
+        <div class="card" id="cardOut">
+          <div class="card__head">
+            <div>
+              <p class="card__k">Feynman Card</p>
+              <h3 class="card__t" id="cardTitle">Loading...</h3>
+            </div>
+            <div class="score" aria-label="Clarity score">
+              <p class="score__n" id="clarityScore">--</p>
+              <p class="score__l">Clarity</p>
+            </div>
+          </div>
+          <div class="card__body" id="cardBody">
+            <p class="muted">Generating your card...</p>
+          </div>
+        </div>
+
+        <p class="onboard__saved">This card has been saved to your profile!</p>
+
+        <div class="onboard__nav">
+          <button class="btn btn--ghost" type="button" id="back4">Back</button>
+          <button class="btn btn--solid" type="button" id="next4">Continue</button>
+        </div>
+
+        <div class="onboard__steps" aria-label="Step 4 of 5">
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--active"></span>
+          <span class="onboard__dot"></span>
+        </div>
+      </section>
+
+      <!-- Step 5: Celebration -->
+      <section class="onboard__step onboard__step--hidden" id="step5" data-step="5">
+        <div class="onboard__confetti" aria-hidden="true"></div>
+        <div class="onboard__achievement">
+          <div class="achievement-badge">
+            <span class="achievement-badge__icon" aria-hidden="true"></span>
+            <span class="achievement-badge__text">First Card Badge</span>
+          </div>
+        </div>
+
+        <h1 class="onboard__title">First Card Created!</h1>
+        <p class="onboard__sub">
+          You've started your learning journey!
+        </p>
+
+        <div class="onboard__streak">
+          <span class="streak-icon" aria-hidden="true"></span>
+          <span>Your streak: <strong>1 day</strong></span>
+        </div>
+        <p class="onboard__streak-hint">Come back tomorrow to keep it going.</p>
+
+        <div class="onboard__options">
+          <label class="onboard__option">
+            <input type="checkbox" id="enableReminders" />
+            <span>Enable daily reminders</span>
+          </label>
+          <label class="onboard__option">
+            <input type="checkbox" id="shareCard" />
+            <span>Share this card</span>
+          </label>
+        </div>
+
+        <a class="btn btn--solid btn--big onboard__cta" href="dashboard.html" id="goDashboard">
+          Go to Dashboard
+        </a>
+
+        <div class="onboard__steps" aria-label="Step 5 of 5">
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--done"></span>
+          <span class="onboard__dot onboard__dot--active"></span>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

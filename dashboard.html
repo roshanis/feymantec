@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="robots" content="noindex" />
+
+    <title>Dashboard | Feymantec</title>
+    <meta name="description" content="Your Feymantec learning dashboard. Track your streak, review cards, and continue learning." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="dashboard.css" />
+    <script src="lib/feymantec-core.js" defer></script>
+    <script src="lib/feymantec-supabase.js" defer></script>
+    <script src="config.js"></script>
+    <script src="dashboard.js" defer></script>
+  </head>
+
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="topbar topbar--dash" data-elevate="off">
+      <div class="shell topbar__inner">
+        <a class="brand" href="index.html" aria-label="Feymantec home">
+          <span class="brand__mark" aria-hidden="true"></span>
+          <span class="brand__name">Feymantec</span>
+        </a>
+
+        <nav class="nav nav--dash">
+          <a class="nav__link nav__link--active" href="dashboard.html">Dashboard</a>
+          <a class="nav__link" href="cards.html">My Cards</a>
+          <a class="nav__link" href="review.html">Review</a>
+        </nav>
+
+        <div class="topbar__cta">
+          <button class="avatar-btn" type="button" id="userMenuBtn" aria-haspopup="true" aria-expanded="false">
+            <span class="avatar" id="userAvatar" aria-hidden="true"></span>
+            <span class="avatar-btn__name" id="userName">User</span>
+          </button>
+          <div class="user-menu" id="userMenu" hidden>
+            <a class="user-menu__item" href="profile.html">Profile</a>
+            <a class="user-menu__item" href="settings.html">Settings</a>
+            <hr class="user-menu__divider" />
+            <button class="user-menu__item" type="button" id="signOutBtn">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="dash-main">
+      <div class="shell">
+        <!-- Loading state -->
+        <div class="dash-loading" id="dashLoading">
+          <div class="spinner" aria-label="Loading dashboard"></div>
+          <p>Loading your dashboard...</p>
+        </div>
+
+        <!-- Auth required state -->
+        <div class="dash-auth" id="dashAuth" hidden>
+          <div class="dash-auth__inner">
+            <h1>Sign in to continue</h1>
+            <p>Access your cards, track your streak, and keep learning.</p>
+            <a class="btn btn--solid btn--big" href="login.html">Sign in</a>
+            <p class="fine">Don't have an account? <a href="index.html#waitlist">Join the waitlist</a></p>
+          </div>
+        </div>
+
+        <!-- Empty state (new user) -->
+        <div class="dash-empty" id="dashEmpty" hidden>
+          <div class="dash-empty__inner">
+            <div class="dash-empty__icon" aria-hidden="true"></div>
+            <h1>Welcome to Feymantec!</h1>
+            <p>Let's create your first Feynman Card and start your learning journey.</p>
+            <a class="btn btn--solid btn--big" href="onboarding.html">Create Your First Card</a>
+            <div class="dash-empty__steps">
+              <p><strong>Here's how it works:</strong></p>
+              <ol>
+                <li>Pick a concept you think you know</li>
+                <li>Explain it simply in your own words</li>
+                <li>We'll find gaps and help you improve</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main dashboard content -->
+        <div class="dash-content" id="dashContent" hidden>
+          <!-- Welcome header -->
+          <div class="dash-header">
+            <h1 class="dash-header__greeting" id="dashGreeting">Welcome back!</h1>
+            <a class="btn btn--solid" href="create.html">Create New Card</a>
+          </div>
+
+          <!-- Stats row -->
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-card__icon stat-card__icon--streak" aria-hidden="true"></div>
+              <p class="stat-card__value" id="statStreak">0</p>
+              <p class="stat-card__label">Day Streak</p>
+              <p class="stat-card__sub" id="statStreakSub">Longest: 0</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__icon stat-card__icon--cards" aria-hidden="true"></div>
+              <p class="stat-card__value" id="statCards">0</p>
+              <p class="stat-card__label">Total Cards</p>
+              <p class="stat-card__sub" id="statCardsSub">0 due today</p>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__icon stat-card__icon--clarity" aria-hidden="true"></div>
+              <p class="stat-card__value" id="statClarity">--</p>
+              <p class="stat-card__label">Avg Clarity</p>
+              <p class="stat-card__sub" id="statClaritySub">Keep going!</p>
+            </div>
+          </div>
+
+          <!-- Daily 5 section -->
+          <section class="dash-section">
+            <div class="dash-section__head">
+              <h2 class="dash-section__title">Today's Daily 5</h2>
+              <button class="btn btn--ghost btn--sm" type="button" id="shuffleDaily">Shuffle</button>
+            </div>
+            <div class="daily-prompt" id="dailyPrompt">
+              <p class="daily-prompt__text" id="dailyPromptText">Loading prompt...</p>
+              <a class="btn btn--solid" href="create.html" id="dailyPromptCta">Create Card</a>
+            </div>
+          </section>
+
+          <!-- Review queue section -->
+          <section class="dash-section" id="reviewSection">
+            <div class="dash-section__head">
+              <h2 class="dash-section__title">Cards Due for Review</h2>
+              <a class="btn btn--ghost btn--sm" href="review.html">Review All</a>
+            </div>
+            <div class="review-queue" id="reviewQueue">
+              <p class="muted" id="reviewEmpty">No cards due for review. Great job!</p>
+            </div>
+          </section>
+
+          <!-- Recent cards section -->
+          <section class="dash-section">
+            <div class="dash-section__head">
+              <h2 class="dash-section__title">Recent Cards</h2>
+              <a class="btn btn--ghost btn--sm" href="cards.html">View All</a>
+            </div>
+            <div class="recent-cards" id="recentCards">
+              <p class="muted" id="recentEmpty">No cards yet. Create your first one!</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="shell footer__inner">
+        <p class="footer__left">
+          <span class="brand__name">Feymantec</span>
+          <span class="footer__dot" aria-hidden="true">·</span>
+          <span class="muted">First principles, not flashcards.</span>
+        </p>
+        <nav class="footer__links">
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+        </nav>
+        <p class="footer__right">
+          <span class="muted">&copy;</span> <span id="year"></span>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

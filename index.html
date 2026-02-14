@@ -232,6 +232,15 @@
 
           <div class="demo">
             <div class="demo__input">
+              <div class="demo__mode-row">
+                <button class="btn btn--ghost btn--sm" type="button" id="fillDaily">
+                  Use Daily 5
+                </button>
+                <button class="btn btn--solid btn--sm" type="button" id="seeExample">
+                  See Example
+                </button>
+              </div>
+
               <div class="field">
                 <label class="label" for="concept">Concept</label>
                 <div class="field__row">
@@ -240,12 +249,9 @@
                     id="concept"
                     name="concept"
                     autocomplete="off"
-                    placeholder="e.g. Bayes’ theorem"
+                    placeholder="e.g. Bayes' theorem"
                     maxlength="80"
                   />
-                  <button class="btn btn--ghost" type="button" id="fillDaily">
-                    Use Daily 5
-                  </button>
                 </div>
                 <div class="suggest" id="conceptSuggest" aria-label="Suggested concepts"></div>
               </div>
