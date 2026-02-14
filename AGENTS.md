@@ -6,26 +6,30 @@
 - `styles.css`: global styling (CSS variables live in `:root`).
 - `app.js`: demo logic, share-link generation, waitlist + referral submission.
 - `lib/feymantec-core.js`: shared, testable utilities (encoding, heuristics, validation).
+- `lib/feymantec-supabase.js`: fetch-based Supabase helper (Auth OTP + PostgREST calls).
 - `share/`: shareable "Feynman Card" page and renderer.
   - `share/index.html`
   - `share/share.js`
-- `tests/`: unit tests (`node:test`).
+- `tests/`: unit tests (Vitest) and E2E tests (Playwright under `tests/e2e/`).
 - `supabase/migrations/`: database migrations for waitlist/referrals.
   - `supabase/migrations/0001_waitlist.sql`
+  - `supabase/migrations/0002_waitlist_auth.sql`
 - Config/docs:
   - `config.js`, `config.example.js` (Supabase URL + anon key)
   - `README.md`, `requirements.md`, `development.log.md`
 
 ## Build, Test, and Development Commands
 
-This repo is intentionally dependency-free (static HTML/CSS/JS).
+Runtime is a static site (HTML/CSS/JS). Dev tooling uses `vitest` and `playwright`.
 
 - Local preview (recommended):
   - `python3 -m http.server 5173`
   - Visit `http://localhost:5173`
 - Run unit tests:
-  - `npm test` (or `node --test`)
+  - `npm test` (Vitest)
   - `npm run test:watch` (TDD loop)
+- Run E2E tests:
+  - `npm run test:e2e` (Playwright; uses `npm run serve` via Playwright config)
 - Lint (syntax checks only):
   - `npm run lint`
 
@@ -38,7 +42,7 @@ This repo is intentionally dependency-free (static HTML/CSS/JS).
 
 ## Testing Guidelines
 
-Unit tests use Node's built-in runner (`node:test`). Follow TDD for core changes:
+Unit tests use Vitest. Follow TDD for core changes:
 
 - Write a failing test in `tests/*.test.js` first (prefer testing `lib/feymantec-core.js`).
 - Implement/fix logic, then run `npm test` until green.
@@ -51,13 +55,13 @@ Manual QA (still required) for:
 
 ## Supabase, Security & Configuration
 
-- Apply `supabase/migrations/0001_waitlist.sql` in Supabase SQL editor.
+- Apply `supabase/migrations/0001_waitlist.sql` and `supabase/migrations/0002_waitlist_auth.sql` in Supabase SQL editor.
 - `config.js` must contain only the **anon** key. Never ship service-role keys.
-- RLS is designed for **insert-only** from the client; avoid adding client-side reads of `waitlist_signups`.
+- Waitlist writes are authenticated (email OTP); reads are limited to the signed-in user's row via RLS.
 
 ## Commit & Pull Request Guidelines
 
-There's no Git history in this workspace yet. Use Conventional Commits, e.g. `feat(demo): add PNG export`.
+Use Conventional Commits, e.g. `feat(waitlist): add email OTP flow`.
 
 PRs should include:
 

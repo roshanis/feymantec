@@ -16,6 +16,11 @@ if (!Core) {
 const { safeTrim, wordCount, isLikelyNSFW, randomId, escapeHtml, buildPreviewCard, encodeJsonToBase64Url, toSharePayload } =
   Core;
 
+const Supa = globalThis.FeymantecSupabase;
+if (!Supa) {
+  throw new Error("Missing FeymantecSupabase. Load lib/feymantec-supabase.js before app.js.");
+}
+
 function getParams() {
   const u = new URL(window.location.href);
   const params = Object.fromEntries(u.searchParams.entries());
@@ -468,52 +473,17 @@ function getConfig() {
   };
 }
 
-async function supabaseInsertWaitlist({ email, refCode, referredBy, utm }) {
+function getSupabaseClient() {
   const cfg = getConfig();
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
     throw new Error("Supabase is not configured (see config.js and README.md).");
   }
 
-  const url = `${cfg.supabaseUrl}/rest/v1/${encodeURIComponent(cfg.waitlistTable)}`;
-  const body = {
-    email,
-    ref_code: refCode,
-    referred_by: referredBy || null,
-    utm_source: utm.utm_source || null,
-    utm_medium: utm.utm_medium || null,
-    utm_campaign: utm.utm_campaign || null,
-    utm_term: utm.utm_term || null,
-    utm_content: utm.utm_content || null,
-  };
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      apikey: cfg.supabaseAnonKey,
-      Authorization: `Bearer ${cfg.supabaseAnonKey}`,
-      "Content-Type": "application/json",
-      Prefer: "return=minimal",
-    },
-    body: JSON.stringify(body),
+  return Supa.createSupabaseClient({
+    supabaseUrl: cfg.supabaseUrl,
+    anonKey: cfg.supabaseAnonKey,
+    fetchFn: fetch,
   });
-
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    let j = null;
-    try {
-      j = txt ? JSON.parse(txt) : null;
-    } catch {
-      // ignore
-    }
-    const msg = safeTrim(String(j?.message || j?.details || j?.hint || txt));
-    const err = new Error(`Supabase insert failed (${res.status}). ${msg || "Unknown error."}`.slice(0, 240));
-    err.status = res.status;
-    err.body = txt;
-    err.json = j;
-    throw err;
-  }
-
-  return true;
 }
 
 function initWaitlist() {
@@ -543,6 +513,11 @@ function initWaitlist() {
   const errBox = qs("#waitlistErr");
   const errMsg = qs("#waitlistErrMsg");
   const refLink = qs("#refLink");
+  const emailEl = qs("#email");
+  const otpWrap = qs("#otpStep");
+  const otpEl = qs("#otpCode");
+  const otpResend = qs("#otpResend");
+  const otpChangeEmail = qs("#otpChangeEmail");
 
   function showErr(message) {
     if (errBox) errBox.hidden = false;
@@ -580,11 +555,93 @@ function initWaitlist() {
     window.setTimeout(() => (qs("#shareText").textContent = "Copy text"), 1200);
   });
 
+  function setStep(step) {
+    form.setAttribute("data-step", step);
+    if (otpWrap) otpWrap.hidden = step !== "verify";
+    if (emailEl) emailEl.disabled = step === "verify";
+    if (submit) submit.textContent = step === "verify" ? "Verify + join waitlist" : "Send code";
+  }
+
+  function cleanOtpCode(raw) {
+    return String(raw || "").replace(/\D/g, "").slice(0, 8);
+  }
+
+  async function sendCode(email) {
+    const client = getSupabaseClient();
+    await client.sendEmailOtp({ email });
+    setStep("verify");
+    if (otpEl) {
+      otpEl.value = "";
+      otpEl.focus();
+    }
+  }
+
+  async function ensureWaitlistRow({ accessToken, userId, email, utm }) {
+    const client = getSupabaseClient();
+
+    // If already signed up (or a retry), fetch their ref code.
+    try {
+      const existing = await client.selectFirst({
+        accessToken,
+        table: cfg.waitlistTable,
+        select: "ref_code",
+        filters: [{ col: "user_id", op: "eq", value: userId }],
+        limit: 1,
+      });
+      if (existing?.ref_code) return String(existing.ref_code);
+    } catch {
+      // If RLS isn't set up yet, we'll fail on insert anyway with a clearer error.
+    }
+
+    // Insert new row.
+    const refCode = randomId(8);
+    await client.insertRow({
+      accessToken,
+      table: cfg.waitlistTable,
+      row: {
+        user_id: userId,
+        email,
+        ref_code: refCode,
+        referred_by: referredBy || null,
+        utm_source: utm.utm_source || null,
+        utm_medium: utm.utm_medium || null,
+        utm_campaign: utm.utm_campaign || null,
+        utm_term: utm.utm_term || null,
+        utm_content: utm.utm_content || null,
+      },
+    });
+
+    return refCode;
+  }
+
+  otpResend?.addEventListener("click", async () => {
+    try {
+      const email = safeTrim(emailEl?.value || "").toLowerCase();
+      if (!email) throw new Error("Enter your email first.");
+      otpResend.disabled = true;
+      otpResend.textContent = "Sending…";
+      await sendCode(email);
+      otpResend.textContent = "Resent";
+      window.setTimeout(() => (otpResend.textContent = "Resend code"), 1200);
+    } catch (err) {
+      showErr(err?.message || "Could not resend code.");
+      otpResend.textContent = "Resend code";
+    } finally {
+      otpResend.disabled = false;
+    }
+  });
+
+  otpChangeEmail?.addEventListener("click", () => {
+    setStep("email");
+    if (otpEl) otpEl.value = "";
+    if (emailEl) emailEl.focus();
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (submit) {
       submit.disabled = true;
-      submit.textContent = "Adding…";
+      submit.textContent = form.getAttribute("data-step") === "verify" ? "Verifying…" : "Sending…";
     }
 
     let email = "";
@@ -593,9 +650,6 @@ function initWaitlist() {
       email = safeTrim(String(fd.get("email") || "")).toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Please use a valid email.");
       if (isLikelyNSFW(email)) throw new Error("Please use a normal email address.");
-
-      // Generate client-side ref code so we don't need SELECT/RETURN privileges.
-      const refCode = randomId(8);
 
       const params = getParams();
       const utm = {
@@ -606,46 +660,38 @@ function initWaitlist() {
         utm_content: params.utm_content || "",
       };
 
-      // Retry on rare ref_code collisions (unique constraint).
-      let ok = false;
-      let attempts = 0;
-      let code = refCode;
-      while (!ok && attempts < 3) {
-        attempts++;
+      const step = form.getAttribute("data-step") || "email";
+      if (step === "email") {
+        await sendCode(email);
+      } else {
+        const rawOtp = safeTrim(String(fd.get("otp") || ""));
+        const token = cleanOtpCode(rawOtp);
+        if (token.length < 4) throw new Error("Enter the code from your email.");
+
+        const client = getSupabaseClient();
+        const sess = await client.verifyEmailOtp({ email, token, type: "email" });
+        const accessToken = String(sess?.access_token || "");
+        const userId = String(sess?.user?.id || "");
+        if (!accessToken || !userId) throw new Error("Could not verify code. Please try again.");
+
+        const refCode = await ensureWaitlistRow({ accessToken, userId, email, utm });
+
         try {
-          await supabaseInsertWaitlist({ email, refCode: code, referredBy, utm });
-          ok = true;
-        } catch (err) {
-          if (err?.status === 409) {
-            const body = String(err?.body || "");
-            if (/waitlist_signups_ref_code_uq|ref_code/i.test(body)) {
-              code = randomId(10);
-              continue;
-            }
-            if (/waitlist_signups_email_uq|email/i.test(body)) {
-              throw new Error("Looks like you're already on the waitlist.");
-            }
-            code = randomId(10);
-            continue;
-          }
-          throw err;
+          localStorage.setItem("feym_waitlist_ref", refCode);
+          localStorage.setItem("feym_waitlist_email", email);
+        } catch {
+          // Private browsing or storage full - continue anyway
         }
-      }
-      if (!ok) throw new Error("Could not generate a unique referral code. Try again.");
 
-      try {
-        localStorage.setItem("feym_waitlist_ref", code);
-        localStorage.setItem("feym_waitlist_email", email);
-      } catch {
-        // Private browsing or storage full - continue anyway
+        const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(refCode)}`;
+        showOk(link);
+        form.hidden = true;
       }
-
-      const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(code)}`;
-      showOk(link);
-      form.hidden = true;
     } catch (err) {
-      const msg = err?.message || "Could not add you. Try again.";
-      if (msg.includes("already on the waitlist")) {
+      const msg = err?.message || "Could not continue. Try again.";
+
+      // If their email is already on the waitlist, show the local link if available.
+      if (/already on the waitlist/i.test(msg)) {
         let storedEmail = "";
         let storedCode = "";
         try {
@@ -659,7 +705,7 @@ function initWaitlist() {
           showOk(link);
           form.hidden = true;
         } else {
-          showErr(`${msg} If you signed up on a different device, your referral link isn’t available here.`);
+          showErr(`${msg} If you signed up on a different device, sign in again to retrieve your link.`);
         }
       } else {
         showErr(msg);
@@ -667,10 +713,13 @@ function initWaitlist() {
     } finally {
       if (submit) {
         submit.disabled = false;
-        submit.textContent = "Join waitlist";
+        const step = form.getAttribute("data-step") || "email";
+        submit.textContent = step === "verify" ? "Verify + join waitlist" : "Send code";
       }
     }
   });
+
+  setStep(form.getAttribute("data-step") || "email");
 }
 
 function initMobileNav() {

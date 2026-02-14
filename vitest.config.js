@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['tests/feymantec-core.test.js'],
+    include: ['tests/**/*.test.js'],
     exclude: ['tests/e2e/**/*'],
     coverage: {
       provider: 'v8',

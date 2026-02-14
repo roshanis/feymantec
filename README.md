@@ -25,12 +25,14 @@ Then visit `http://localhost:5173`.
 ## Supabase Setup (Waitlist + Referrals)
 
 1. Create a Supabase project.
-2. In the SQL editor, run `supabase/migrations/0001_waitlist.sql`.
+2. In the SQL editor, run:
+   - `supabase/migrations/0001_waitlist.sql`
+   - `supabase/migrations/0002_waitlist_auth.sql`
 3. Edit `config.js` and fill in:
    - `supabaseUrl`
    - `supabaseAnonKey`
 
-The waitlist form will start inserting rows into `public.waitlist_signups`.
+The waitlist form uses passwordless email OTP (send code, then verify) and inserts rows into `public.waitlist_signups`.
 
 ## Pages
 

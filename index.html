@@ -29,6 +29,7 @@
 
     <link rel="stylesheet" href="styles.css" />
     <script src="lib/feymantec-core.js" defer></script>
+    <script src="lib/feymantec-supabase.js" defer></script>
     <script src="config.js"></script>
     <script src="app.js" defer></script>
   </head>
@@ -454,7 +455,7 @@
             </div>
 
             <div class="wait__form">
-              <form class="form" id="waitlistForm">
+              <form class="form" id="waitlistForm" data-step="email">
                 <label class="label" for="email">Email</label>
                 <input
                   type="email"
@@ -467,11 +468,34 @@
                   required
                   aria-describedby="waitlistErrMsg"
                 />
+                <div class="otp-step" id="otpStep" hidden>
+                  <label class="label" for="otpCode">Email code</label>
+                  <input
+                    type="text"
+                    class="input input--big"
+                    id="otpCode"
+                    name="otp"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    placeholder="6-digit code"
+                    maxlength="8"
+                    aria-describedby="otpHelp waitlistErrMsg"
+                  />
+                  <p class="fine" id="otpHelp">We emailed you a 6-digit code. It expires in ~10 minutes.</p>
+                  <div class="shareRow">
+                    <button class="btn btn--ghost btn--wide" type="button" id="otpResend">
+                      Resend code
+                    </button>
+                    <button class="btn btn--ghost btn--wide" type="button" id="otpChangeEmail">
+                      Use different email
+                    </button>
+                  </div>
+                </div>
                 <button class="btn btn--solid btn--big btn--wide" type="submit" id="waitlistSubmit">
-                  Join waitlist
+                  Send code
                 </button>
                 <p class="fine">
-                  No spam. One “you’re in” email, then a TestFlight invite when it’s your turn.
+                  No password. We'll email you a one-time code, then a TestFlight invite when it’s your turn.
                 </p>
               </form>
 

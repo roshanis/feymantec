@@ -1194,6 +1194,16 @@ a {
   display: grid;
   gap: 10px;
 }
+.otp-step {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(11, 14, 19, 0.22);
+}
+.otp-step .shareRow {
+  margin-top: 8px;
+}
 .result {
   margin-top: 12px;
   border-radius: var(--radius);
@@ -1358,4 +1368,3 @@ a {
     grid-template-columns: 1fr;
   }
 }
-

@@ -24,8 +24,13 @@
   - `favicon.svg`
 - Implemented TDD-friendly core logic + unit tests.
   - Extracted shared utilities into `lib/feymantec-core.js` and refactored `app.js` + `share/share.js` to use it
-  - Added `tests/core.test.js` (Node's built-in `node:test`)
-  - Added `package.json` scripts for `npm test` / `npm run test:watch` / `npm run lint`
+  - Added Vitest unit tests and wiring (`tests/feymantec-core.test.js`, `vitest.config.js`)
+  - Added `package.json` scripts for `npm test` / `npm run test:watch` / `npm run lint` / Playwright E2E
+
+- Implemented passwordless email OTP waitlist signup (FreeCodeCamp-style).
+  - Added Supabase helper library: `lib/feymantec-supabase.js` (+ unit tests in `tests/feymantec-supabase.test.js`)
+  - Updated waitlist UI + flow: `index.html`, `app.js` (send code -> verify -> insert)
+  - Added authenticated waitlist migration: `supabase/migrations/0002_waitlist_auth.sql` (stores `user_id`, enables per-user select)
 
 ### Agent-Driven Improvements (TDD)
 

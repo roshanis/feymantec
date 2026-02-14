@@ -8,7 +8,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "lint": "node --check app.js && node --check share/share.js && node --check lib/feymantec-core.js",
+    "lint": "node --check app.js && node --check share/share.js && node --check lib/feymantec-core.js && node --check lib/feymantec-supabase.js",
     "serve": "npx serve ."
   },
   "devDependencies": {

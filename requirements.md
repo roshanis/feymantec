@@ -68,6 +68,9 @@ This web artifact is the "web-first" validation layer:
 - FR-041: On success, show a referral link and quick share actions.
 - FR-042: When arriving with `?ref=...`, persist attribution for later signup.
 - FR-043: If email already exists, show a helpful message.
+- FR-044: Waitlist signup uses passwordless email OTP (send code, then verify).
+- FR-045: Waitlist inserts are authenticated and store `user_id` (Supabase Auth `auth.uid()`).
+- FR-046: Users can resend the OTP and switch emails before verification.
 
 ## Non-Functional Requirements
 
@@ -76,7 +79,7 @@ This web artifact is the "web-first" validation layer:
 - NFR-003: Accessible basics: keyboard navigation, focus states, readable contrast, skip link.
 - NFR-004: No secret keys shipped to the client.
 - NFR-005: Safe topic policy: block NSFW and provide disclaimers for sensitive topics (health/legal/finance).
-- NFR-006: TDD: add/update unit tests for core logic and bug fixes. Tests live in `tests/**/*.test.js` and must pass via `node --test` (or `npm test`).
+- NFR-006: TDD: add/update unit tests for core logic and bug fixes. Tests live in `tests/**/*.test.js` and must pass via `npm test` (Vitest).
 
 ## Data Requirements (Supabase)
 
