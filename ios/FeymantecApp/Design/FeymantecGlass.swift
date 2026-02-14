@@ -32,7 +32,8 @@ extension View {
   ) -> some View {
     if #available(iOS 26, *) {
       self
-        .glassEffect(.thin.tint(tint).interactive(interactive), in: .capsule)
+        // Note: iOS 26 Liquid Glass currently exposes `.regular` (no `.thin`).
+        .glassEffect(.regular.tint(tint).interactive(interactive), in: .capsule)
     } else {
       self
         .background(.ultraThinMaterial, in: Capsule(style: .continuous))
