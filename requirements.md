@@ -2,16 +2,26 @@
 
 ## Overview
 
-Build a high-conversion webpage for **Feymantec**, an iOS app that helps anyone learn any concept in **5 minutes** using the **Feynman technique**.
+Build a high-conversion webpage for **Feymantec**, an iOS app that helps anyone learn any concept **from first principles** in **5 minutes** using the **Feynman technique**.
 
 This web artifact is the "web-first" validation layer:
 - Explain the product clearly.
 - Provide an interactive demo that feels like the app.
-- Capture a TestFlight waitlist with referrals.
+- Capture a Feymantec waitlist with referrals.
 - Provide shareable assets (Card pages and PNG export) that seed organic growth.
+
+## Core Philosophy: First Principles
+
+Everything in Feymantec is built around **first-principles thinking**:
+
+- Users don't memorize — they **break concepts down to their foundations** and rebuild understanding from scratch.
+- The coaching loop forces users to reason from the ground up: explain simply, find gaps in reasoning, compress to essentials, and verify with questions.
+- Copy, prompts, and feedback throughout the product should reinforce this philosophy. Avoid language that implies rote learning, surface recall, or passive consumption.
+- The tagline is: **"First principles, not flashcards."**
 
 ## Product Decisions (Locked)
 
+- Philosophy: **First-principles learning** via the Feynman technique
 - Audience: **Anyone**
 - AI: **Required** in the iOS product
 - Monetization: **Freemium**
@@ -34,7 +44,7 @@ This web artifact is the "web-first" validation layer:
 ## Functional Requirements
 
 ### Landing
-- FR-001: Clear headline promise: "Learn any concept in 5 minutes."
+- FR-001: Clear headline promise: "Understand any concept from first principles in 5 minutes."
 - FR-002: Explain the 5-step loop (pick, explain, find gap, rewrite/analogy, quick check).
 - FR-003: Include CTA(s) that lead to waitlist signup.
 - FR-004: Include pricing section: Free vs Pro (provisional pricing acceptable).

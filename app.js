@@ -189,6 +189,7 @@ function renderCard(card) {
 
   qs("#cardBody").innerHTML = blocks.join("");
   qs("#cardFoot").hidden = false;
+}
 
 function setConceptSuggestions(setConcept) {
   const el = qs("#conceptSuggest");
@@ -375,26 +376,6 @@ function initDemo(daily) {
   const explainEl = qs("#explain");
   const genBtn = qs("#genCard");
   const fillDaily = qs("#fillDaily");
-  const shareA = qs("#shareLink");
-  const copyShare = qs("#copyShare");
-  const dl = qs("#downloadPng");
-  const shareHint = qs("#shareHint");
-
-  function setShareState(enabled, hintText = "") {
-    if (shareA) {
-      if (enabled) {
-        shareA.setAttribute("aria-disabled", "false");
-      } else {
-        shareA.setAttribute("aria-disabled", "true");
-      }
-    }
-    if (copyShare) copyShare.disabled = !enabled;
-    if (dl) dl.disabled = !enabled;
-    if (shareHint) {
-      shareHint.hidden = enabled;
-      shareHint.textContent = hintText || "Generate a card to enable sharing.";
-    }
-  }
 
   function setConcept(v) {
     if (!conceptEl) return;
@@ -417,7 +398,6 @@ function initDemo(daily) {
 
   if (explainEl) explainEl.addEventListener("input", updateExplainMeta);
   updateExplainMeta();
-  setShareState(false);
 
   let lastCard = null;
 
@@ -435,9 +415,9 @@ function initDemo(daily) {
     renderCard(card);
 
     const href = buildShareHref(card);
+    const shareA = qs("#shareLink");
     if (shareA) shareA.href = href;
-    if (copyShare) copyShare.setAttribute("data-share-href", new URL(href, window.location.href).toString());
-    setShareState(true);
+    qs("#copyShare")?.setAttribute("data-share-href", new URL(href, window.location.href).toString());
   }
 
   if (genBtn) {
@@ -449,26 +429,22 @@ function initDemo(daily) {
         qs("#clarityScore").textContent = "—";
         qs("#cardBody").innerHTML = `<p class="muted">${escapeHtml(e?.message || "Couldn’t generate a card.")}</p>`;
         qs("#cardFoot").hidden = true;
-        if (shareA) shareA.removeAttribute("href");
-        if (copyShare) copyShare.removeAttribute("data-share-href");
-        setShareState(false, "Generate a valid card first, then share or download.");
       }
     });
   }
 
+  const copyShare = qs("#copyShare");
   if (copyShare) {
     copyShare.addEventListener("click", async () => {
       const href = copyShare.getAttribute("data-share-href") || "";
-      if (!href) {
-        setShareState(false, "Generate a card first to create a shareable link.");
-        return;
-      }
+      if (!href) return;
       const ok = await copyText(href);
       copyShare.textContent = ok ? "Copied" : "Copy failed";
       window.setTimeout(() => (copyShare.textContent = "Copy share link"), 1200);
     });
   }
 
+  const dl = qs("#downloadPng");
   if (dl) {
     dl.addEventListener("click", async () => {
       if (!lastCard) return;
@@ -477,15 +453,6 @@ function initDemo(daily) {
         await downloadPngFromCard(lastCard);
       } finally {
         dl.textContent = "Download PNG";
-      }
-    });
-  }
-
-  if (shareA) {
-    shareA.addEventListener("click", (e) => {
-      if (shareA.getAttribute("aria-disabled") === "true") {
-        e.preventDefault();
-        setShareState(false, "Generate a card first to open the share page.");
       }
     });
   }
@@ -501,17 +468,52 @@ function getConfig() {
   };
 }
 
-function getSupabaseClient() {
+async function supabaseInsertWaitlist({ email, refCode, referredBy, utm }) {
   const cfg = getConfig();
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
     throw new Error("Supabase is not configured (see config.js and README.md).");
   }
 
-  return Supa.createSupabaseClient({
-    supabaseUrl: cfg.supabaseUrl,
-    anonKey: cfg.supabaseAnonKey,
-    fetchFn: fetch,
+  const url = `${cfg.supabaseUrl}/rest/v1/${encodeURIComponent(cfg.waitlistTable)}`;
+  const body = {
+    email,
+    ref_code: refCode,
+    referred_by: referredBy || null,
+    utm_source: utm.utm_source || null,
+    utm_medium: utm.utm_medium || null,
+    utm_campaign: utm.utm_campaign || null,
+    utm_term: utm.utm_term || null,
+    utm_content: utm.utm_content || null,
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      apikey: cfg.supabaseAnonKey,
+      Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify(body),
   });
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    let j = null;
+    try {
+      j = txt ? JSON.parse(txt) : null;
+    } catch {
+      // ignore
+    }
+    const msg = safeTrim(String(j?.message || j?.details || j?.hint || txt));
+    const err = new Error(`Supabase insert failed (${res.status}). ${msg || "Unknown error."}`.slice(0, 240));
+    err.status = res.status;
+    err.body = txt;
+    err.json = j;
+    throw err;
+  }
+
+  return true;
 }
 
 function initWaitlist() {
@@ -541,39 +543,11 @@ function initWaitlist() {
   const errBox = qs("#waitlistErr");
   const errMsg = qs("#waitlistErrMsg");
   const refLink = qs("#refLink");
-  const emailEl = qs("#email");
-  const otpWrap = qs("#otpStep");
-  const otpEl = qs("#otpCode");
-  const otpResend = qs("#otpResend");
-  const otpChangeEmail = qs("#otpChangeEmail");
-  const recoverBtn = qs("#recoverWaitlist");
-  const refProgressFill = qs("#refProgressFill");
-  const refProgressText = qs("#refProgressText");
 
   function showErr(message) {
     if (errBox) errBox.hidden = false;
     if (result) result.hidden = true;
     if (errMsg) errMsg.textContent = message;
-  }
-
-  async function fetchReferralCount(accessToken, refCode) {
-    if (!accessToken || !refCode) return null;
-    const cfg = getConfig();
-    const endpoint = `${cfg.supabaseUrl.replace(/\/+$/, "")}/rest/v1/rpc/waitlist_referral_count`;
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        apikey: cfg.supabaseAnonKey,
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ref: refCode }),
-    });
-    if (!res.ok) throw new Error("Could not load referral count.");
-    const value = await res.json();
-    const n = Number(value);
-    if (!Number.isFinite(n) || n < 0) return null;
-    return Math.floor(n);
   }
 
   function showOk(link) {
@@ -587,31 +561,6 @@ function initWaitlist() {
         `I’m on the Feymantec TestFlight waitlist. Join me: ${link}`
       )}`
     );
-  }
-
-  function setReferralProgress(current, goal) {
-    const safeGoal = Math.max(1, Number(goal) || 1);
-    const safeCurrent = Math.max(0, Number(current) || 0);
-    const pct = Math.min(100, Math.round((safeCurrent / safeGoal) * 100));
-    if (refProgressFill) refProgressFill.style.width = `${pct}%`;
-    if (refProgressText) {
-      const left = Math.max(0, safeGoal - safeCurrent);
-      refProgressText.textContent =
-        left > 0
-          ? `${safeCurrent}/${safeGoal} referrals tracked. Refer ${left} more ${left === 1 ? "friend" : "friends"} to unlock 5 sessions/day.`
-          : `${safeCurrent}/${safeGoal} referrals tracked. 5 sessions/day unlocked.`;
-    }
-  }
-
-  async function showOkWithProgress({ link, accessToken = "", refCode = "" }) {
-    showOk(link);
-    setReferralProgress(0, 2);
-    try {
-      const n = await fetchReferralCount(accessToken, refCode);
-      if (n !== null) setReferralProgress(n, 2);
-    } catch {
-      // Leave baseline progress when RPC is not deployed yet.
-    }
   }
 
   qs("#copyRef")?.addEventListener("click", async () => {
@@ -631,101 +580,11 @@ function initWaitlist() {
     window.setTimeout(() => (qs("#shareText").textContent = "Copy text"), 1200);
   });
 
-  function setStep(step) {
-    form.setAttribute("data-step", step);
-    if (otpWrap) otpWrap.hidden = step !== "verify";
-    if (emailEl) emailEl.disabled = step === "verify";
-    if (submit) submit.textContent = step === "verify" ? "Verify + join waitlist" : "Send code";
-  }
-
-  function cleanOtpCode(raw) {
-    return String(raw || "").replace(/\D/g, "").slice(0, 8);
-  }
-
-  async function sendCode(email) {
-    const client = getSupabaseClient();
-    await client.sendEmailOtp({ email });
-    setStep("verify");
-    if (otpEl) {
-      otpEl.value = "";
-      otpEl.focus();
-    }
-  }
-
-  async function ensureWaitlistRow({ accessToken, userId, email, utm }) {
-    const client = getSupabaseClient();
-
-    // If already signed up (or a retry), fetch their ref code.
-    try {
-      const existing = await client.selectFirst({
-        accessToken,
-        table: cfg.waitlistTable,
-        select: "ref_code",
-        filters: [{ col: "user_id", op: "eq", value: userId }],
-        limit: 1,
-      });
-      if (existing?.ref_code) return String(existing.ref_code);
-    } catch {
-      // If RLS isn't set up yet, we'll fail on insert anyway with a clearer error.
-    }
-
-    // Insert new row.
-    const refCode = randomId(8);
-    await client.insertRow({
-      accessToken,
-      table: cfg.waitlistTable,
-      row: {
-        user_id: userId,
-        email,
-        ref_code: refCode,
-        referred_by: referredBy || null,
-        utm_source: utm.utm_source || null,
-        utm_medium: utm.utm_medium || null,
-        utm_campaign: utm.utm_campaign || null,
-        utm_term: utm.utm_term || null,
-        utm_content: utm.utm_content || null,
-      },
-    });
-
-    return refCode;
-  }
-
-  otpResend?.addEventListener("click", async () => {
-    try {
-      const email = safeTrim(emailEl?.value || "").toLowerCase();
-      if (!email) throw new Error("Enter your email first.");
-      otpResend.disabled = true;
-      otpResend.textContent = "Sending…";
-      await sendCode(email);
-      otpResend.textContent = "Resent";
-      window.setTimeout(() => (otpResend.textContent = "Resend code"), 1200);
-    } catch (err) {
-      showErr(err?.message || "Could not resend code.");
-      otpResend.textContent = "Resend code";
-    } finally {
-      otpResend.disabled = false;
-    }
-  });
-
-  otpChangeEmail?.addEventListener("click", () => {
-    setStep("email");
-    if (otpEl) otpEl.value = "";
-    if (emailEl) emailEl.focus();
-  });
-
-  recoverBtn?.addEventListener("click", () => {
-    form.hidden = false;
-    if (result) result.hidden = true;
-    if (errBox) errBox.hidden = true;
-    setStep("email");
-    if (emailEl) emailEl.focus();
-  });
-
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (submit) {
       submit.disabled = true;
-      submit.textContent = form.getAttribute("data-step") === "verify" ? "Verifying…" : "Sending…";
+      submit.textContent = "Adding…";
     }
 
     let email = "";
@@ -734,6 +593,9 @@ function initWaitlist() {
       email = safeTrim(String(fd.get("email") || "")).toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Please use a valid email.");
       if (isLikelyNSFW(email)) throw new Error("Please use a normal email address.");
+
+      // Generate client-side ref code so we don't need SELECT/RETURN privileges.
+      const refCode = randomId(8);
 
       const params = getParams();
       const utm = {
@@ -744,27 +606,29 @@ function initWaitlist() {
         utm_content: params.utm_content || "",
       };
 
-      const step = form.getAttribute("data-step") || "email";
-      if (step === "email") {
-        await sendCode(email);
-      } else {
-        const rawOtp = safeTrim(String(fd.get("otp") || ""));
-        const token = cleanOtpCode(rawOtp);
-        if (token.length < 4) throw new Error("Enter the code from your email.");
-
-        const client = getSupabaseClient();
-        const sess = await client.verifyEmailOtp({ email, token, type: "email" });
-        const accessToken = String(sess?.access_token || "");
-        const userId = String(sess?.user?.id || "");
-        if (!accessToken || !userId) throw new Error("Could not verify code. Please try again.");
-
-        const refCode = await ensureWaitlistRow({ accessToken, userId, email, utm });
-
+      // Retry on rare ref_code collisions (unique constraint).
+      let ok = false;
+      let attempts = 0;
+      let code = refCode;
+      while (!ok && attempts < 3) {
+        attempts++;
         try {
-          localStorage.setItem("feym_waitlist_ref", refCode);
-          localStorage.setItem("feym_waitlist_email", email);
-        } catch {
-          // Private browsing or storage full - continue anyway
+          await supabaseInsertWaitlist({ email, refCode: code, referredBy, utm });
+          ok = true;
+        } catch (err) {
+          if (err?.status === 409) {
+            const body = String(err?.body || "");
+            if (/waitlist_signups_ref_code_uq|ref_code/i.test(body)) {
+              code = randomId(10);
+              continue;
+            }
+            if (/waitlist_signups_email_uq|email/i.test(body)) {
+              throw new Error("Looks like you're already on the waitlist.");
+            }
+            code = randomId(10);
+            continue;
+          }
+          throw err;
         }
       }
       if (!ok) throw new Error("Could not generate a unique referral code. Try again.");
@@ -776,10 +640,9 @@ function initWaitlist() {
         // Private browsing or storage full - continue anyway
       }
 
-        const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(refCode)}`;
-        await showOkWithProgress({ link, accessToken, refCode });
-        form.hidden = true;
-      }
+      const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(code)}`;
+      showOk(link);
+      form.hidden = true;
     } catch (err) {
       const msg = err?.message || "Could not add you. Try again.";
       if (msg.includes("already on the waitlist")) {
@@ -794,12 +657,9 @@ function initWaitlist() {
         if (storedEmail && storedEmail === email && storedCode) {
           const link = `${cfg.siteUrl.replace(/\/+$/, "")}/?ref=${encodeURIComponent(storedCode)}`;
           showOk(link);
-          setReferralProgress(0, 2);
           form.hidden = true;
         } else {
-          form.hidden = false;
-          setStep("email");
-          showErr("You are already on the waitlist. Send a fresh code, then verify to retrieve your referral link.");
+          showErr(`${msg} If you signed up on a different device, your referral link isn’t available here.`);
         }
       } else {
         showErr(msg);
@@ -807,60 +667,8 @@ function initWaitlist() {
     } finally {
       if (submit) {
         submit.disabled = false;
-        const step = form.getAttribute("data-step") || "email";
-        submit.textContent = step === "verify" ? "Verify + join waitlist" : "Send code";
+        submit.textContent = "Join waitlist";
       }
-    }
-  });
-
-  setStep(form.getAttribute("data-step") || "email");
-}
-
-function initMobileNav() {
-  const toggle = qs("#navToggle");
-  const mobileNav = qs("#navMobile");
-  if (!toggle || !mobileNav) return;
-
-  function closeNav() {
-    toggle.setAttribute("aria-expanded", "false");
-    mobileNav.classList.remove("is-open");
-  }
-
-  function openNav() {
-    toggle.setAttribute("aria-expanded", "true");
-    mobileNav.classList.add("is-open");
-  }
-
-  toggle.addEventListener("click", () => {
-    const isOpen = toggle.getAttribute("aria-expanded") === "true";
-    if (isOpen) {
-      closeNav();
-    } else {
-      openNav();
-    }
-  });
-
-  // Close nav when clicking a link
-  qsa(".nav-mobile__link").forEach((link) => {
-    link.addEventListener("click", closeNav);
-  });
-
-  // Close nav on escape key
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && mobileNav.classList.contains("is-open")) {
-      closeNav();
-      toggle.focus();
-    }
-  });
-
-  // Close nav when clicking outside
-  document.addEventListener("click", (e) => {
-    if (
-      mobileNav.classList.contains("is-open") &&
-      !mobileNav.contains(e.target) &&
-      !toggle.contains(e.target)
-    ) {
-      closeNav();
     }
   });
 }

@@ -326,7 +326,25 @@ describe('buildPreviewCard', () => {
       'Test',
       'This is a test explanation with enough content to generate a proper card.'
     );
-    expect(card.simple.length).toBe(5);
+    expect(card.simple).toHaveLength(5);
+  });
+
+  it('simple version references the concept', () => {
+    const card = Core.buildPreviewCard(
+      'Photosynthesis',
+      'Plants absorb sunlight and convert carbon dioxide and water into glucose and oxygen.'
+    );
+    expect(card.simple[0]).toContain('Photosynthesis');
+  });
+
+  it('simple version includes the user explanation text', () => {
+    const card = Core.buildPreviewCard(
+      'Photosynthesis',
+      'Plants absorb sunlight and convert carbon dioxide and water into glucose and oxygen. This happens in the chloroplasts. Light energy drives the reaction.'
+    );
+    // At least one of the user's sentences should appear in the simple output.
+    const joined = card.simple.join(' ');
+    expect(joined).toContain('Plants absorb sunlight');
   });
 
   it('generates exactly 2 quiz questions', () => {
@@ -354,6 +372,39 @@ describe('buildPreviewCard', () => {
       'This is a test explanation about machine learning concepts.'
     );
     expect(card.analogy).toContain('Machine Learning');
+  });
+
+  it('analogy varies by concept', () => {
+    const card1 = Core.buildPreviewCard(
+      'Photosynthesis',
+      'Plants absorb sunlight and convert it to energy using chlorophyll.'
+    );
+    const card2 = Core.buildPreviewCard(
+      'TCP handshake',
+      'A three-way handshake establishes a connection between client and server.'
+    );
+    // Different concepts should (usually) produce different analogies.
+    // The pool has 6 entries, so collisions are possible but unlikely for these two.
+    expect(card1.analogy).not.toBe(card2.analogy);
+  });
+
+  it('quiz questions reference the concept', () => {
+    const card = Core.buildPreviewCard(
+      'Photosynthesis',
+      'Plants absorb sunlight and convert carbon dioxide and water into glucose and oxygen.'
+    );
+    expect(card.quiz[0].q).toContain('Photosynthesis');
+    expect(card.quiz[1].q).toContain('Photosynthesis');
+  });
+
+  it('gaps reference the concept when relevant', () => {
+    const card = Core.buildPreviewCard(
+      'Photosynthesis',
+      'its the process by which plants absorb photons and use it to create energy'
+    );
+    // At least one gap should mention the concept.
+    const allGaps = card.gaps.join(' ');
+    expect(allGaps).toContain('Photosynthesis');
   });
 });
 
