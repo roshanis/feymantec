@@ -68,6 +68,9 @@ This web artifact is the "web-first" validation layer:
 - FR-041: On success, show a referral link and quick share actions.
 - FR-042: When arriving with `?ref=...`, persist attribution for later signup.
 - FR-043: If email already exists, show a helpful message.
+- FR-044: Waitlist signup uses passwordless email OTP (send code, then verify).
+- FR-045: Waitlist inserts are authenticated and store `user_id` (Supabase Auth `auth.uid()`).
+- FR-046: Users can resend the OTP and switch emails before verification.
 
 ## Non-Functional Requirements
 
@@ -85,6 +88,7 @@ This web artifact is the "web-first" validation layer:
 Fields:
 - `id` uuid primary key
 - `created_at` timestamptz
+- `user_id` uuid (Supabase Auth user id)
 - `email` citext unique
 - `ref_code` text unique
 - `referred_by` text nullable
@@ -97,10 +101,12 @@ Fields:
 Constraints:
 - Unique on `email`
 - Unique on `ref_code`
+- Unique on `user_id` (when present)
 
 RLS:
-- Allow `anon` inserts only
-- Disallow selects for `anon` by default
+- Allow `authenticated` inserts only (must insert with `user_id = auth.uid()`)
+- Allow `authenticated` selects only for own row (`user_id = auth.uid()`)
+- Disallow selects/inserts for `anon` by default
 
 ## Out Of Scope (Web MVP)
 

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+
+  <title>Feymantec</title>
+  <meta name="description" content="Your guided Feynman practice." />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="lib/feymantec-core.js" defer></script>
+  <script src="lib/feymantec-supabase.js" defer></script>
+  <script src="config.js"></script>
+  <script src="dashboard.js" defer></script>
+</head>
+
+<body class="dash-page">
+
+  <!-- Minimal topbar -->
+  <header class="dash-topbar">
+    <a class="brand" href="/dashboard.html" aria-label="Feymantec home">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__name">Feymantec</span>
+    </a>
+    <button class="dash-topbar__signout" type="button" id="signOut">Sign out</button>
+  </header>
+
+  <!-- Progress bar -->
+  <div class="wiz-progress" aria-hidden="true">
+    <div class="wiz-progress__bar" id="wizBar" style="width: 20%"></div>
+  </div>
+
+  <main class="wiz">
+
+    <!-- Step 1: Pick concept -->
+    <section class="wiz__step" id="wizStep1">
+      <p class="wiz__label">Step 1 of 5</p>
+      <h1 class="wiz__title">What do you want to learn?</h1>
+      <p class="wiz__sub">Pick a concept you want to understand deeply.</p>
+
+      <div class="wiz__field">
+        <input
+          class="wiz__input"
+          id="wizConcept"
+          type="text"
+          placeholder="e.g. Bayes' theorem"
+          maxlength="80"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="dash-suggestions" id="dashSuggestions" aria-label="Suggested concepts"></div>
+
+      <button class="wiz__btn" type="button" id="wizNext1" disabled>Start</button>
+    </section>
+
+    <!-- Step 2: Explain -->
+    <section class="wiz__step is-hidden" id="wizStep2">
+      <button class="wiz__back" type="button" id="wizBack2">&larr; Back</button>
+      <p class="wiz__label">Step 2 of 5</p>
+      <h1 class="wiz__title">Explain <span id="wizConceptDisplay2"></span></h1>
+      <p class="wiz__sub">Write it out like you're teaching a friend. No jargon. Take your time.</p>
+
+      <div class="wiz__field">
+        <textarea
+          class="wiz__textarea"
+          id="wizExplain"
+          rows="10"
+          placeholder="In simple terms, this concept is about..."
+        ></textarea>
+        <p class="wiz__hint" id="wizWordCount">0 words</p>
+      </div>
+
+      <button class="wiz__btn" type="button" id="wizNext2" disabled>Next</button>
+    </section>
+
+    <!-- Step 3: Find the gaps -->
+    <section class="wiz__step is-hidden" id="wizStep3">
+      <button class="wiz__back" type="button" id="wizBack3">&larr; Back</button>
+      <p class="wiz__label">Step 3 of 5</p>
+      <h1 class="wiz__title">Here are the gaps</h1>
+      <p class="wiz__sub">Based on your explanation, these are the areas to sharpen.</p>
+
+      <div class="wiz__gaps" id="wizGaps"></div>
+
+      <div class="wiz__jargon-wrap is-hidden" id="wizJargonWrap">
+        <p class="wiz__jargon-label">Spiky words you used</p>
+        <div class="wiz__jargon" id="wizJargon"></div>
+      </div>
+
+      <button class="wiz__btn" type="button" id="wizNext3">Next</button>
+    </section>
+
+    <!-- Step 4: Simplify + Analogy -->
+    <section class="wiz__step is-hidden" id="wizStep4">
+      <button class="wiz__back" type="button" id="wizBack4">&larr; Back</button>
+      <p class="wiz__label">Step 4 of 5</p>
+      <h1 class="wiz__title">Simplify and connect</h1>
+      <p class="wiz__sub">Here's a simpler version of what you said, plus an analogy to anchor it.</p>
+
+      <div class="wiz__block">
+        <h3 class="wiz__block-title">Simpler version</h3>
+        <p class="wiz__block-text" id="wizSimple"></p>
+      </div>
+
+      <div class="wiz__block">
+        <h3 class="wiz__block-title">Analogy</h3>
+        <p class="wiz__block-text" id="wizAnalogy"></p>
+      </div>
+
+      <button class="wiz__btn" type="button" id="wizNext4">Next</button>
+    </section>
+
+    <!-- Step 5: Quick check -->
+    <section class="wiz__step is-hidden" id="wizStep5">
+      <button class="wiz__back" type="button" id="wizBack5">&larr; Back</button>
+      <p class="wiz__label">Step 5 of 5</p>
+      <h1 class="wiz__title">Quick check</h1>
+      <p class="wiz__sub">Answer these to see how well it stuck.</p>
+
+      <div class="wiz__quiz" id="wizQuiz"></div>
+
+      <button class="wiz__btn" type="button" id="wizFinish">See your Feynman Card</button>
+    </section>
+
+    <!-- Final: Full card -->
+    <section class="wiz__step is-hidden" id="wizStepCard">
+      <h1 class="wiz__title">Your Feynman Card</h1>
+      <p class="wiz__sub">A complete snapshot of what you learned.</p>
+
+      <div class="card" id="cardOut">
+        <div class="card__head">
+          <div>
+            <p class="card__k">Feynman Card</p>
+            <h3 class="card__t" id="cardTitle"></h3>
+          </div>
+          <div class="score" aria-label="Clarity score">
+            <p class="score__n" id="clarityScore">—</p>
+            <p class="score__l">Clarity</p>
+          </div>
+        </div>
+        <div class="card__body" id="cardBody"></div>
+        <div class="card__foot" id="cardFoot">
+          <button class="btn btn--ghost" type="button" id="wizRestart">Start another</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

@@ -5,6 +5,8 @@ window.__FEYNMAN_CONFIG__ = {
   supabaseUrl: "",
   // Supabase Project Settings -> API -> anon public key
   supabaseAnonKey: "",
+  // Supabase Edge Function name for OpenAI proxy
+  aiFunctionName: "ai-explain",
   // Table name created by supabase/migrations/0001_waitlist.sql
   waitlistTable: "waitlist_signups",
   // Used to build referral links shown after signup

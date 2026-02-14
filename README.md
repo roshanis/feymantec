@@ -25,12 +25,44 @@ Then visit `http://localhost:5173`.
 ## Supabase Setup (Waitlist + Referrals)
 
 1. Create a Supabase project.
-2. In the SQL editor, run `supabase/migrations/0001_waitlist.sql`.
+2. In the SQL editor, run:
+   - `supabase/migrations/0001_waitlist.sql`
+   - `supabase/migrations/0002_waitlist_auth.sql`
+   - `supabase/migrations/0003_waitlist_referral_count.sql`
 3. Edit `config.js` and fill in:
    - `supabaseUrl`
    - `supabaseAnonKey`
 
-The waitlist form will start inserting rows into `public.waitlist_signups`.
+The waitlist form uses passwordless email OTP (send code, then verify) and inserts rows into `public.waitlist_signups`.
+
+## OpenAI AI Integration (Supabase Edge Function)
+
+This repo now includes a server-side OpenAI proxy at `supabase/functions/ai-explain/index.ts`.
+
+Why: keep your OpenAI key off the client while letting `app.js` call AI safely through Supabase.
+
+### 1) Deploy the Edge Function
+
+```bash
+supabase functions deploy ai-explain
+```
+
+### 2) Set function secrets
+
+```bash
+supabase secrets set OPENAI_API_KEY=your_key_here
+supabase secrets set OPENAI_MODEL=gpt-4o-mini
+```
+
+`OPENAI_MODEL` is optional; it defaults to `gpt-4o-mini`.
+
+### 3) Client config
+
+In `config.js`, keep using only public values and optionally set:
+
+- `aiFunctionName` (defaults to `ai-explain`)
+
+The browser helper is available as `window.FeymantecAI` from `lib/feymantec-ai.js`.
 
 ## Pages
 

@@ -12,13 +12,14 @@
 - `tests/`: unit tests (`node:test`).
 - `supabase/migrations/`: database migrations for waitlist/referrals.
   - `supabase/migrations/0001_waitlist.sql`
+  - `supabase/migrations/0002_waitlist_auth.sql`
 - Config/docs:
   - `config.js`, `config.example.js` (Supabase URL + anon key)
   - `README.md`, `requirements.md`, `development.log.md`
 
 ## Build, Test, and Development Commands
 
-This repo is intentionally dependency-free (static HTML/CSS/JS).
+Runtime is a static site (HTML/CSS/JS). Dev tooling uses `vitest` and `playwright`.
 
 - Local preview (recommended):
   - `python3 -m http.server 5173`
@@ -51,13 +52,13 @@ Manual QA (still required) for:
 
 ## Supabase, Security & Configuration
 
-- Apply `supabase/migrations/0001_waitlist.sql` in Supabase SQL editor.
+- Apply `supabase/migrations/0001_waitlist.sql` and `supabase/migrations/0002_waitlist_auth.sql` in Supabase SQL editor.
 - `config.js` must contain only the **anon** key. Never ship service-role keys.
-- RLS is designed for **insert-only** from the client; avoid adding client-side reads of `waitlist_signups`.
+- Waitlist writes are authenticated (email OTP); reads are limited to the signed-in user's row via RLS.
 
 ## Commit & Pull Request Guidelines
 
-There's no Git history in this workspace yet. Use Conventional Commits, e.g. `feat(demo): add PNG export`.
+Use Conventional Commits, e.g. `feat(waitlist): add email OTP flow`.
 
 PRs should include:
 
