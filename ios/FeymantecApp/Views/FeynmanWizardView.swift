@@ -15,6 +15,11 @@ struct FeynmanWizardView: View {
     case loading
     case loaded(introText: String)
     case failed(message: String)
+
+    var isLoading: Bool {
+      if case .loading = self { return true }
+      return false
+    }
   }
 
   @State private var step: Step = .pick
@@ -29,6 +34,8 @@ struct FeynmanWizardView: View {
   @State private var critiqueText: String = ""
   @State private var critiqueSuggestions: [String] = []
   @State private var critiqueScore: Int? = nil
+  @State private var feynmanState: LearnState = .idle
+  @State private var feynmanText: String = ""
 
   @Namespace private var glassNamespace
 
@@ -44,34 +51,48 @@ struct FeynmanWizardView: View {
     ZStack {
       FeymantecBackgroundView()
 
-      VStack(spacing: 18) {
-        header
+      if step == .card {
+        VStack(spacing: 0) {
+          header
+            .padding(.horizontal, 18)
+            .padding(.top, 18)
+            .padding(.bottom, 10)
 
-        Spacer(minLength: 0)
-
-        FeymantecGlassContainer(spacing: 18) {
-          content
+          cardStep
             .frame(maxWidth: 560)
+            .padding(.horizontal, 18)
+            .padding(.bottom, 18)
         }
+      } else {
+        VStack(spacing: 18) {
+          header
 
-        Spacer(minLength: 0)
-      }
-      .padding(18)
-      .animation(.spring(response: 0.45, dampingFraction: 0.90), value: step)
-      .onChange(of: step) { _, next in
-        if next != .explain {
-          timerActive = false
-        }
-      }
-      .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { now in
-        guard timerActive else { return }
-        let dt = now.timeIntervalSince(lastTick)
-        if dt >= 0.99 {
-          lastTick = now
-          remainingSeconds = max(0, remainingSeconds - 1)
-          if remainingSeconds == 0 {
-            timerActive = false
+          Spacer(minLength: 0)
+
+          FeymantecGlassContainer(spacing: 18) {
+            content
+              .frame(maxWidth: 560)
           }
+
+          Spacer(minLength: 0)
+        }
+        .padding(18)
+        .animation(.spring(response: 0.45, dampingFraction: 0.90), value: step)
+      }
+    }
+    .onChange(of: step) { _, next in
+      if next != .explain {
+        timerActive = false
+      }
+    }
+    .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { now in
+      guard timerActive else { return }
+      let dt = now.timeIntervalSince(lastTick)
+      if dt >= 0.99 {
+        lastTick = now
+        remainingSeconds = max(0, remainingSeconds - 1)
+        if remainingSeconds == 0 {
+          timerActive = false
         }
       }
     }
@@ -119,7 +140,7 @@ struct FeynmanWizardView: View {
     case .explain:
       explainStep
     case .card:
-      cardStep
+      EmptyView()
     }
   }
 
@@ -217,6 +238,8 @@ struct FeynmanWizardView: View {
           critiqueText = ""
           critiqueSuggestions = []
           critiqueScore = nil
+          feynmanState = .idle
+          feynmanText = ""
           step = .card
         } label: {
           Text("Make card")
@@ -239,10 +262,28 @@ struct FeynmanWizardView: View {
 
   private var cardStep: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 14) {
-        PreviewCardView(card: card)
+      VStack(alignment: .leading, spacing: 16) {
+        HStack(alignment: .firstTextBaseline) {
+          Text(concept.fey_safeTrim())
+            .font(.system(size: 22, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+
+          Spacer(minLength: 0)
+
+          if let score = critiqueScore {
+            Text("\(score)")
+              .font(.system(size: 15, weight: .bold, design: .rounded))
+              .foregroundStyle(.white)
+              .padding(.vertical, 8)
+              .padding(.horizontal, 12)
+              .background(.white.opacity(0.15), in: Capsule())
+              .accessibilityLabel("AI score")
+          }
+        }
 
         aiFeedbackSection
+
+        feynmanSection
 
         HStack(spacing: 12) {
           Button {
@@ -261,17 +302,20 @@ struct FeynmanWizardView: View {
 
           Spacer(minLength: 0)
 
-          ShareLink(item: shareText(card)) {
-            Text("Share")
+          Button {
+            fetchFeynman()
+          } label: {
+            Text("Feynman")
           }
+          .disabled(feynmanState.isLoading)
           .fey_primaryButtonStyle()
         }
       }
-      .padding(18)
+      .padding(20)
     }
     .scrollIndicators(.hidden)
-    .fey_glassCard(interactive: false)
-    .fey_glassEffectID("step.card", in: glassNamespace)
+    .background(Color(white: 0.10).opacity(0.92), in: RoundedRectangle(cornerRadius: FeymantecGlass.cardRadius, style: .continuous))
+    .clipShape(RoundedRectangle(cornerRadius: FeymantecGlass.cardRadius, style: .continuous))
     .onAppear {
       if case .idle = critiqueState {
         fetchCritique()
@@ -281,59 +325,111 @@ struct FeynmanWizardView: View {
 
   @ViewBuilder
   private var aiFeedbackSection: some View {
-    Rectangle()
-      .fill(.white.opacity(0.12))
-      .frame(height: 1)
+    switch critiqueState {
+    case .idle, .loading:
+      HStack(spacing: 10) {
+        ProgressView()
+          .tint(.white)
+        Text("Getting AI feedback…")
+          .font(.system(size: 15, weight: .medium, design: .rounded))
+          .foregroundStyle(.white.opacity(0.7))
+      }
+      .frame(maxWidth: .infinity, minHeight: 80)
 
-    VStack(alignment: .leading, spacing: 10) {
-      Text("AI Feedback")
-        .font(.system(size: 14, weight: .bold, design: .rounded))
-        .foregroundStyle(.white)
-
-      switch critiqueState {
-      case .idle, .loading:
-        HStack(spacing: 8) {
-          ProgressView()
-            .tint(.white)
-          Text("Getting AI feedback…")
-            .font(.system(size: 13, weight: .medium, design: .rounded))
-            .foregroundStyle(.white.opacity(0.75))
-        }
-
-      case .loaded:
-        if let score = critiqueScore {
-          Text("Score: \(score)/100")
-            .font(.system(size: 14, weight: .bold, design: .rounded))
-            .foregroundStyle(.white)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 10)
-            .fey_glassChip(tint: .white.opacity(0.10), interactive: false)
-        }
-
+    case .loaded:
+      VStack(alignment: .leading, spacing: 14) {
         if !critiqueText.isEmpty {
           Text(critiqueText)
-            .font(.system(size: 13, weight: .medium, design: .rounded))
-            .foregroundStyle(.white.opacity(0.85))
+            .font(.system(size: 15, weight: .regular, design: .rounded))
+            .foregroundStyle(.white.opacity(0.95))
             .fixedSize(horizontal: false, vertical: true)
+            .lineSpacing(3)
         }
 
         if !critiqueSuggestions.isEmpty {
-          ForEach(critiqueSuggestions, id: \.self) { suggestion in
-            Text("• \(suggestion)")
-              .font(.system(size: 13, weight: .medium, design: .rounded))
-              .foregroundStyle(.white.opacity(0.85))
-              .fixedSize(horizontal: false, vertical: true)
-          }
-        }
+          VStack(alignment: .leading, spacing: 8) {
+            Text("Try next")
+              .font(.system(size: 14, weight: .bold, design: .rounded))
+              .foregroundStyle(.white.opacity(0.6))
+              .textCase(.uppercase)
 
-      case .failed(let message):
+            ForEach(critiqueSuggestions, id: \.self) { suggestion in
+              HStack(alignment: .top, spacing: 8) {
+                Circle()
+                  .fill(.white.opacity(0.4))
+                  .frame(width: 6, height: 6)
+                  .padding(.top, 6)
+                Text(suggestion)
+                  .font(.system(size: 14, weight: .medium, design: .rounded))
+                  .foregroundStyle(.white.opacity(0.9))
+                  .fixedSize(horizontal: false, vertical: true)
+                  .lineSpacing(2)
+              }
+            }
+          }
+          .padding(14)
+          .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+      }
+
+    case .failed(let message):
+      VStack(spacing: 10) {
         Text(message)
-          .font(.system(size: 13, weight: .medium, design: .rounded))
+          .font(.system(size: 14, weight: .medium, design: .rounded))
           .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.35))
           .fixedSize(horizontal: false, vertical: true)
 
         Button {
           fetchCritique()
+        } label: {
+          Text("Retry")
+        }
+        .fey_secondaryButtonStyle()
+      }
+    }
+  }
+
+  @ViewBuilder
+  private var feynmanSection: some View {
+    switch feynmanState {
+    case .idle:
+      EmptyView()
+
+    case .loading:
+      HStack(spacing: 10) {
+        ProgressView()
+          .tint(.white)
+        Text("Feynman is thinking…")
+          .font(.system(size: 15, weight: .medium, design: .rounded))
+          .foregroundStyle(.white.opacity(0.7))
+      }
+      .frame(maxWidth: .infinity, minHeight: 60)
+
+    case .loaded:
+      VStack(alignment: .leading, spacing: 10) {
+        Text("Feynman Explanation")
+          .font(.system(size: 14, weight: .bold, design: .rounded))
+          .foregroundStyle(.white.opacity(0.6))
+          .textCase(.uppercase)
+
+        Text(feynmanText)
+          .font(.system(size: 15, weight: .regular, design: .rounded))
+          .foregroundStyle(.white.opacity(0.95))
+          .fixedSize(horizontal: false, vertical: true)
+          .lineSpacing(3)
+      }
+      .padding(14)
+      .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+    case .failed(let message):
+      VStack(spacing: 10) {
+        Text(message)
+          .font(.system(size: 14, weight: .medium, design: .rounded))
+          .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.35))
+          .fixedSize(horizontal: false, vertical: true)
+
+        Button {
+          fetchFeynman()
         } label: {
           Text("Retry")
         }
@@ -475,6 +571,26 @@ struct FeynmanWizardView: View {
         critiqueState = .loaded(introText: "")
       } catch {
         critiqueState = .failed(message: "Couldn't get AI feedback. Check your connection and try again.")
+      }
+    }
+  }
+
+  private func fetchFeynman() {
+    feynmanState = .loading
+    let topicText = concept.fey_safeTrim()
+    let explanationText = explanation.fey_safeTrim()
+    Task {
+      do {
+        let request = AIExplainRequest(
+          inputText: explanationText,
+          topic: topicText,
+          mode: "feynman"
+        )
+        let response = try await FeymantecAPIClient.shared.callAIExplain(request)
+        feynmanText = response.resultText
+        feynmanState = .loaded(introText: "")
+      } catch {
+        feynmanState = .failed(message: "Couldn't load explanation. Check your connection and try again.")
       }
     }
   }

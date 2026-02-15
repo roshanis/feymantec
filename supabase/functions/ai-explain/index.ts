@@ -7,7 +7,7 @@ const CORS_HEADERS = {
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const DEFAULT_MODEL = "gpt-5.2";
 
-type ExplainMode = "simplify" | "critique" | "daily5" | "intro";
+type ExplainMode = "simplify" | "critique" | "daily5" | "intro" | "feynman";
 
 type RequestPayload = {
   inputText?: string;
@@ -28,7 +28,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 
 function normalizeMode(raw: string): ExplainMode {
   const mode = String(raw || "").trim().toLowerCase();
-  if (mode === "critique" || mode === "daily5" || mode === "intro") return mode;
+  if (mode === "critique" || mode === "daily5" || mode === "intro" || mode === "feynman") return mode;
   return "simplify";
 }
 
@@ -37,10 +37,13 @@ function buildTaskInstruction(mode: ExplainMode): string {
     return "Give a 2-3 paragraph beginner-friendly introduction to the topic. Cover what it is, why it matters, and one concrete example. Use language a smart 12-year-old could follow. Do NOT explain everything — leave gaps for the learner to discover when they try to teach it back. Keep resultText under 200 words.";
   }
   if (mode === "critique") {
-    return "Give focused critique: point out ambiguity, missing steps, and jargon. Then provide a cleaner rewrite.";
+    return "You are reviewing a learner's explanation of a topic using the Feynman technique. In resultText: (1) State what they got right in 1 sentence. (2) Identify the biggest gap or misconception — explain what's missing and WHY it matters, in 2-3 sentences a beginner would understand. (3) Give a short, improved version of their explanation (3-5 sentences max). In suggestions: list 2-4 specific, actionable next steps the learner should try (e.g. 'Explain what happens when X fails' not 'Add more detail'). Score 0-100 based on clarity, accuracy, and completeness for a beginner audience. Keep resultText under 250 words.";
   }
   if (mode === "daily5") {
     return "Act like a 5-minute Feynman coach. Give a concise rewrite, 2 gap questions, and one memory-friendly analogy.";
+  }
+  if (mode === "feynman") {
+    return "You are Richard Feynman. The user has tried to explain a topic and you are now explaining it the way YOU would — from first principles, in your own voice. Write in resultText as Feynman speaking directly to the learner: warm, curious, conversational. Start from the simplest possible foundation and build up. Use vivid everyday analogies. If something is subtle or commonly misunderstood, pause and say 'Now here's the thing most people get wrong...' or 'Let me show you why that matters.' Never use jargon without immediately unpacking it. Make the learner feel the joy of understanding. Keep it under 300 words. In suggestions, list 1-2 follow-up questions Feynman would challenge the learner with.";
   }
   return "Simplify the explanation for a smart 12-year-old and keep the core meaning intact.";
 }
