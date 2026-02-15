@@ -258,7 +258,9 @@ struct FeynmanWizardView: View {
       .fey_secondaryButtonStyle()
     }
     .padding(18)
-    .fey_glassCard(interactive: true)
+    // Note: `.interactive(true)` on glass surfaces can interfere with inner scroll views
+    // and text input on the iOS simulator. Keep the large surface non-interactive.
+    .fey_glassCard(interactive: false)
     .fey_glassEffectID("step.pick", in: glassNamespace)
   }
 
@@ -318,7 +320,7 @@ struct FeynmanWizardView: View {
       }
     }
     .padding(18)
-    .fey_glassCard(interactive: true)
+    .fey_glassCard(interactive: false)
     .fey_glassEffectID("step.explain", in: glassNamespace)
     .onAppear {
       if remainingSeconds <= 0 || remainingSeconds > 5 * 60 {
@@ -670,7 +672,7 @@ struct FeynmanWizardView: View {
       }
     }
     .padding(18)
-    .fey_glassCard(interactive: true)
+    .fey_glassCard(interactive: false)
     .fey_glassEffectID("step.learn", in: glassNamespace)
   }
 

@@ -82,6 +82,11 @@ public struct FeymantecGlassContainer<Content: View>: View {
   }
 
   public var body: some View {
+    // iOS 26 simulator has intermittent gesture/scroll issues when content is wrapped
+    // in `GlassEffectContainer`. Prefer the plain fallback on simulator builds.
+    #if targetEnvironment(simulator)
+    content
+    #else
     if #available(iOS 26, macOS 26, visionOS 26, *) {
       GlassEffectContainer(spacing: spacing) {
         content
@@ -89,5 +94,6 @@ public struct FeymantecGlassContainer<Content: View>: View {
     } else {
       content
     }
+    #endif
   }
 }
