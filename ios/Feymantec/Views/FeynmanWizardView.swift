@@ -66,6 +66,7 @@ struct FeynmanWizardView: View {
   var body: some View {
     ZStack {
       FeymantecBackgroundView()
+        .allowsHitTesting(false)
 
       if step == .card {
         VStack(spacing: 0) {

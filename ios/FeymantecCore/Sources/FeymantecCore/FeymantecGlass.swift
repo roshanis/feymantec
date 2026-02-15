@@ -12,8 +12,19 @@ public extension View {
     interactive: Bool = false
   ) -> some View {
     if #available(iOS 26, macOS 26, visionOS 26, *) {
+      #if targetEnvironment(simulator)
+      // iOS 26 simulator currently has gesture/scroll issues with Liquid Glass.
+      // Prefer stable material rendering in simulator builds.
+      self
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .overlay(
+          RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .strokeBorder(.white.opacity(0.12), lineWidth: 1)
+        )
+      #else
       self
         .glassEffect(.regular.tint(tint).interactive(interactive), in: .rect(cornerRadius: cornerRadius))
+      #endif
     } else {
       self
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
@@ -31,9 +42,18 @@ public extension View {
     interactive: Bool = false
   ) -> some View {
     if #available(iOS 26, macOS 26, visionOS 26, *) {
+      #if targetEnvironment(simulator)
+      self
+        .background(.ultraThinMaterial, in: Capsule(style: .continuous))
+        .overlay(
+          Capsule(style: .continuous)
+            .strokeBorder(.white.opacity(0.10), lineWidth: 1)
+        )
+      #else
       self
         // Note: iOS 26 Liquid Glass currently exposes `.regular` (no `.thin`).
         .glassEffect(.regular.tint(tint).interactive(interactive), in: .capsule)
+      #endif
     } else {
       self
         .background(.ultraThinMaterial, in: Capsule(style: .continuous))
@@ -47,7 +67,11 @@ public extension View {
   @ViewBuilder
   func fey_primaryButtonStyle() -> some View {
     if #available(iOS 26, macOS 26, visionOS 26, *) {
+      #if targetEnvironment(simulator)
+      self.buttonStyle(.borderedProminent)
+      #else
       self.buttonStyle(.glassProminent)
+      #endif
     } else {
       self.buttonStyle(.borderedProminent)
     }
@@ -56,7 +80,11 @@ public extension View {
   @ViewBuilder
   func fey_secondaryButtonStyle() -> some View {
     if #available(iOS 26, macOS 26, visionOS 26, *) {
+      #if targetEnvironment(simulator)
+      self.buttonStyle(.bordered)
+      #else
       self.buttonStyle(.glass)
+      #endif
     } else {
       self.buttonStyle(.bordered)
     }
@@ -65,7 +93,11 @@ public extension View {
   @ViewBuilder
   func fey_glassEffectID(_ id: String, in namespace: Namespace.ID) -> some View {
     if #available(iOS 26, macOS 26, visionOS 26, *) {
+      #if targetEnvironment(simulator)
+      self
+      #else
       self.glassEffectID(id, in: namespace)
+      #endif
     } else {
       self
     }
