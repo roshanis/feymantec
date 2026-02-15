@@ -4,6 +4,11 @@ import Combine
 import FeymantecCore
 
 struct FeynmanWizardView: View {
+  enum FocusField: Hashable {
+    case concept
+    case explanation
+  }
+
   enum Step {
     case pick
     case learn
@@ -52,6 +57,7 @@ struct FeynmanWizardView: View {
 
   @Environment(\.scenePhase) private var scenePhase
   @Namespace private var glassNamespace
+  @FocusState private var focusedField: FocusField?
 
   private var isBlocked: Bool {
     TopicPolicy.isLikelyNSFW(concept)
@@ -131,17 +137,25 @@ struct FeynmanWizardView: View {
         lastTick = .now
       }
     }
+    .toolbar {
+      ToolbarItemGroup(placement: .keyboard) {
+        Spacer()
+        Button("Done") {
+          focusedField = nil
+        }
+      }
+    }
   }
 
   private var header: some View {
     HStack(alignment: .center, spacing: 12) {
       VStack(alignment: .leading, spacing: 2) {
         Text("Feymantec")
-          .font(.system(size: 20, weight: .semibold, design: .rounded))
+          .font(.system(.title3, design: .rounded).weight(.semibold))
           .foregroundStyle(.white)
 
         Text("First principles, not flashcards")
-          .font(.system(size: 12, weight: .medium, design: .rounded))
+          .font(.system(.caption, design: .rounded).weight(.medium))
           .foregroundStyle(.white.opacity(0.70))
       }
 
@@ -156,7 +170,8 @@ struct FeynmanWizardView: View {
   private var timerChip: some View {
     if step == .explain {
       Text(timeString(remainingSeconds))
-        .font(.system(size: 14, weight: .semibold, design: .rounded))
+        .font(.system(.callout, design: .rounded).weight(.semibold))
+        .monospacedDigit()
         .foregroundStyle(.white)
         .padding(.vertical, 10)
         .padding(.horizontal, 14)
@@ -182,19 +197,26 @@ struct FeynmanWizardView: View {
   private var pickStep: some View {
     VStack(alignment: .leading, spacing: 14) {
       Text("Learn any concept in 5 minutes")
-        .font(.system(size: 28, weight: .bold, design: .rounded))
+        .font(.system(.title, design: .rounded).weight(.bold))
         .foregroundStyle(.white)
         .fixedSize(horizontal: false, vertical: true)
 
       Text("Pick a concept. Teach it simply. We’ll show the gaps.")
-        .font(.system(size: 14, weight: .medium, design: .rounded))
+        .font(.system(.callout, design: .rounded).weight(.medium))
         .foregroundStyle(.white.opacity(0.75))
 
       VStack(alignment: .leading, spacing: 10) {
         TextField("e.g. TCP congestion control", text: $concept)
           .textInputAutocapitalization(.sentences)
-          .autocorrectionDisabled(false)
-          .font(.system(size: 16, weight: .semibold, design: .rounded))
+          .autocorrectionDisabled(true)
+          .submitLabel(.go)
+          .focused($focusedField, equals: .concept)
+          .onSubmit {
+            if !concept.fey_safeTrim().isEmpty && !isBlocked {
+              startExplain()
+            }
+          }
+          .font(.system(.body, design: .rounded).weight(.semibold))
           .foregroundStyle(.white)
           .padding(.vertical, 14)
           .padding(.horizontal, 14)
@@ -202,7 +224,7 @@ struct FeynmanWizardView: View {
 
         if isBlocked {
           Text("That topic isn’t allowed. Try a different concept.")
-            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .font(.system(.caption, design: .rounded).weight(.semibold))
             .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.35))
         }
       }
@@ -243,20 +265,34 @@ struct FeynmanWizardView: View {
   private var explainStep: some View {
     VStack(alignment: .leading, spacing: 12) {
       Text(concept.fey_safeTrim().isEmpty ? "Teach it" : concept.fey_safeTrim())
-        .font(.system(size: 22, weight: .bold, design: .rounded))
+        .font(.system(.title2, design: .rounded).weight(.bold))
         .foregroundStyle(.white)
 
       Text("Explain like you’re teaching a smart 12-year-old. Use 1 example if you can.")
-        .font(.system(size: 13, weight: .medium, design: .rounded))
+        .font(.system(.callout, design: .rounded).weight(.medium))
         .foregroundStyle(.white.opacity(0.75))
 
-      TextEditor(text: $explanation)
-        .font(.system(size: 15, weight: .medium, design: .rounded))
-        .foregroundStyle(.white)
-        .scrollContentBackground(.hidden)
-        .frame(minHeight: 220)
-        .padding(14)
-        .fey_glassCard(tint: .white.opacity(0.07), interactive: true)
+      ZStack(alignment: .topLeading) {
+        if explanation.fey_safeTrim().isEmpty {
+          Text("Start from the simplest true statement, then build.")
+            .font(.system(.body, design: .rounded).weight(.medium))
+            .foregroundStyle(.white.opacity(0.45))
+            .padding(.horizontal, 18)
+            .padding(.vertical, 22)
+            .allowsHitTesting(false)
+        }
+
+        TextEditor(text: $explanation)
+          .font(.system(.body, design: .rounded).weight(.medium))
+          .foregroundStyle(.white)
+          .scrollContentBackground(.hidden)
+          .textInputAutocapitalization(.sentences)
+          .autocorrectionDisabled(false)
+          .focused($focusedField, equals: .explanation)
+          .frame(minHeight: 220)
+          .padding(14)
+      }
+      .fey_glassCard(tint: .white.opacity(0.07), interactive: true)
 
       HStack(spacing: 12) {
         Button {
@@ -298,14 +334,14 @@ struct FeynmanWizardView: View {
       VStack(alignment: .leading, spacing: 16) {
         HStack(alignment: .firstTextBaseline) {
           Text(concept.fey_safeTrim())
-            .font(.system(size: 22, weight: .bold, design: .rounded))
+            .font(.system(.title2, design: .rounded).weight(.bold))
             .foregroundStyle(.white)
 
           Spacer(minLength: 0)
 
           if let score = critique.score {
             Text("\(score)")
-              .font(.system(size: 15, weight: .bold, design: .rounded))
+              .font(.system(.callout, design: .rounded).weight(.bold))
               .foregroundStyle(.white)
               .padding(.vertical, 8)
               .padding(.horizontal, 12)
@@ -321,22 +357,19 @@ struct FeynmanWizardView: View {
         feynmanSection
 
         HStack(spacing: 12) {
-          Button {
-            step = .pick
+          Menu {
+            Button("Edit") {
+              step = .explain
+            }
+            ShareLink(item: shareText()) {
+              Text("Share")
+            }
+            Divider()
+            Button("Start over", role: .destructive) {
+              step = .pick
+            }
           } label: {
-            Text("Start over")
-          }
-          .fey_secondaryButtonStyle()
-
-          Button {
-            step = .explain
-          } label: {
-            Text("Edit")
-          }
-          .fey_secondaryButtonStyle()
-
-          ShareLink(item: shareText()) {
-            Text("Share")
+            Text("More")
           }
           .fey_secondaryButtonStyle()
 
@@ -369,14 +402,14 @@ struct FeynmanWizardView: View {
     return VStack(alignment: .leading, spacing: 12) {
       HStack(alignment: .firstTextBaseline) {
         Text("Instant card")
-          .font(.system(size: 14, weight: .bold, design: .rounded))
+          .font(.system(.caption, design: .rounded).weight(.bold))
           .foregroundStyle(.white.opacity(0.6))
           .textCase(.uppercase)
 
         Spacer(minLength: 0)
 
         Text("Local \(card.score)")
-          .font(.system(size: 13, weight: .bold, design: .rounded))
+          .font(.system(.caption, design: .rounded).weight(.bold))
           .foregroundStyle(.white.opacity(0.9))
           .padding(.vertical, 7)
           .padding(.horizontal, 10)
@@ -387,17 +420,17 @@ struct FeynmanWizardView: View {
       if !card.gaps.isEmpty {
         VStack(alignment: .leading, spacing: 8) {
           Text("Gaps")
-            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .font(.system(.caption, design: .rounded).weight(.bold))
             .foregroundStyle(.white.opacity(0.8))
 
           ForEach(card.gaps, id: \.self) { gap in
             HStack(alignment: .top, spacing: 8) {
               Circle()
                 .fill(.white.opacity(0.4))
-                .frame(width: 6, height: 6)
-                .padding(.top, 6)
+                  .frame(width: 6, height: 6)
+                  .padding(.top, 6)
               Text(gap)
-                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .font(.system(.callout, design: .rounded).weight(.medium))
                 .foregroundStyle(.white.opacity(0.9))
                 .fixedSize(horizontal: false, vertical: true)
                 .lineSpacing(2)
@@ -409,10 +442,10 @@ struct FeynmanWizardView: View {
       if !card.analogy.isEmpty {
         VStack(alignment: .leading, spacing: 6) {
           Text("Analogy")
-            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .font(.system(.caption, design: .rounded).weight(.bold))
             .foregroundStyle(.white.opacity(0.8))
           Text(card.analogy)
-            .font(.system(size: 14, weight: .regular, design: .rounded))
+            .font(.system(.callout, design: .rounded))
             .foregroundStyle(.white.opacity(0.9))
             .fixedSize(horizontal: false, vertical: true)
             .lineSpacing(2)
@@ -422,12 +455,12 @@ struct FeynmanWizardView: View {
       if !card.quiz.isEmpty {
         VStack(alignment: .leading, spacing: 8) {
           Text("Quick check")
-            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .font(.system(.caption, design: .rounded).weight(.bold))
             .foregroundStyle(.white.opacity(0.8))
 
           ForEach(card.quiz, id: \.q) { item in
             Text("Q: \(item.q)")
-              .font(.system(size: 14, weight: .medium, design: .rounded))
+              .font(.system(.callout, design: .rounded).weight(.medium))
               .foregroundStyle(.white.opacity(0.9))
               .fixedSize(horizontal: false, vertical: true)
           }
@@ -447,7 +480,7 @@ struct FeynmanWizardView: View {
           .tint(.white)
           .accessibilityLabel("Loading AI feedback")
         Text("Getting AI feedback…")
-          .font(.system(size: 15, weight: .medium, design: .rounded))
+          .font(.system(.callout, design: .rounded).weight(.medium))
           .foregroundStyle(.white.opacity(0.7))
       }
       .frame(maxWidth: .infinity, minHeight: 80)
@@ -456,7 +489,7 @@ struct FeynmanWizardView: View {
       VStack(alignment: .leading, spacing: 14) {
         if !critique.text.isEmpty {
           Text(critique.text)
-            .font(.system(size: 15, weight: .regular, design: .rounded))
+            .font(.system(.body, design: .rounded))
             .foregroundStyle(.white.opacity(0.95))
             .fixedSize(horizontal: false, vertical: true)
             .lineSpacing(3)
@@ -465,7 +498,7 @@ struct FeynmanWizardView: View {
         if !critique.suggestions.isEmpty {
           VStack(alignment: .leading, spacing: 8) {
             Text("Try next")
-              .font(.system(size: 14, weight: .bold, design: .rounded))
+              .font(.system(.caption, design: .rounded).weight(.bold))
               .foregroundStyle(.white.opacity(0.6))
               .textCase(.uppercase)
 
@@ -476,7 +509,7 @@ struct FeynmanWizardView: View {
                   .frame(width: 6, height: 6)
                   .padding(.top, 6)
                 Text(suggestion)
-                  .font(.system(size: 14, weight: .medium, design: .rounded))
+                  .font(.system(.callout, design: .rounded).weight(.medium))
                   .foregroundStyle(.white.opacity(0.9))
                   .fixedSize(horizontal: false, vertical: true)
                   .lineSpacing(2)
@@ -491,7 +524,7 @@ struct FeynmanWizardView: View {
     case .failed(let message):
       VStack(spacing: 10) {
         Text(message)
-          .font(.system(size: 14, weight: .medium, design: .rounded))
+          .font(.system(.callout, design: .rounded).weight(.medium))
           .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.35))
           .fixedSize(horizontal: false, vertical: true)
 
@@ -517,7 +550,7 @@ struct FeynmanWizardView: View {
           .tint(.white)
           .accessibilityLabel("Loading Feynman explanation")
         Text("Feynman is thinking…")
-          .font(.system(size: 15, weight: .medium, design: .rounded))
+          .font(.system(.callout, design: .rounded).weight(.medium))
           .foregroundStyle(.white.opacity(0.7))
       }
       .frame(maxWidth: .infinity, minHeight: 60)
@@ -525,12 +558,12 @@ struct FeynmanWizardView: View {
     case .loaded:
       VStack(alignment: .leading, spacing: 10) {
         Text("Feynman Explanation")
-          .font(.system(size: 14, weight: .bold, design: .rounded))
+          .font(.system(.caption, design: .rounded).weight(.bold))
           .foregroundStyle(.white.opacity(0.6))
           .textCase(.uppercase)
 
         Text(feynmanText)
-          .font(.system(size: 15, weight: .regular, design: .rounded))
+          .font(.system(.body, design: .rounded))
           .foregroundStyle(.white.opacity(0.95))
           .fixedSize(horizontal: false, vertical: true)
           .lineSpacing(3)
@@ -541,7 +574,7 @@ struct FeynmanWizardView: View {
     case .failed(let message):
       VStack(spacing: 10) {
         Text(message)
-          .font(.system(size: 14, weight: .medium, design: .rounded))
+          .font(.system(.callout, design: .rounded).weight(.medium))
           .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.35))
           .fixedSize(horizontal: false, vertical: true)
 
@@ -558,12 +591,12 @@ struct FeynmanWizardView: View {
   private var learnStep: some View {
     VStack(alignment: .leading, spacing: 14) {
       Text("Quick intro: \(concept.fey_safeTrim())")
-        .font(.system(size: 22, weight: .bold, design: .rounded))
+        .font(.system(.title2, design: .rounded).weight(.bold))
         .foregroundStyle(.white)
         .fixedSize(horizontal: false, vertical: true)
 
       Text("Read this brief intro, then try teaching it back.")
-        .font(.system(size: 13, weight: .medium, design: .rounded))
+        .font(.system(.callout, design: .rounded).weight(.medium))
         .foregroundStyle(.white.opacity(0.75))
 
       Group {
@@ -581,7 +614,7 @@ struct FeynmanWizardView: View {
         case .loaded(let text):
           ScrollView {
             Text(text)
-              .font(.system(size: 15, weight: .medium, design: .rounded))
+              .font(.system(.body, design: .rounded).weight(.medium))
               .foregroundStyle(.white.opacity(0.9))
               .fixedSize(horizontal: false, vertical: true)
           }
@@ -590,7 +623,7 @@ struct FeynmanWizardView: View {
         case .failed(let message):
           VStack(spacing: 10) {
             Text(message)
-              .font(.system(size: 13, weight: .medium, design: .rounded))
+              .font(.system(.callout, design: .rounded).weight(.medium))
               .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.35))
               .fixedSize(horizontal: false, vertical: true)
 
