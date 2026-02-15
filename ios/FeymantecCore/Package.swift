@@ -27,8 +27,7 @@ let package = Package(
         // Add a proper test target once Xcode is configured on the machine running CI.
         .executableTarget(
             name: "FeymantecCoreTdd",
-            dependencies: ["FeymantecCore"],
-            exclude: ["Design"]
+            dependencies: ["FeymantecCore"]
         ),
     ]
 )

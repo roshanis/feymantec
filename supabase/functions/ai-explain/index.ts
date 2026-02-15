@@ -32,6 +32,27 @@ function normalizeMode(raw: string): ExplainMode {
   return "simplify";
 }
 
+function isLikelyNSFW(text: string): boolean {
+  return /\b(porn|xxx|nude|nudes|onlyfans|hardcore|hentai|blowjob|sex\s+tape)\b/i.test(text);
+}
+
+// In-memory per-IP rate limiter. Resets on function cold start, which is
+// acceptable for Deno edge functions (short-lived isolates).
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 30; // requests per window
+const RATE_WINDOW_MS = 60_000; // 1 minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= RATE_LIMIT;
+}
+
 function buildTaskInstruction(mode: ExplainMode): string {
   if (mode === "intro") {
     return "Give a 2-3 paragraph beginner-friendly introduction to the topic. Cover what it is, why it matters, and one concrete example. Use language a smart 12-year-old could follow. Do NOT explain everything — leave gaps for the learner to discover when they try to teach it back. Keep resultText under 200 words.";
@@ -67,6 +88,12 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: "Method not allowed. Use POST." }, 405);
   }
 
+  // Rate limit by IP
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkRateLimit(ip)) {
+    return jsonResponse({ error: "Too many requests. Please wait a moment." }, 429);
+  }
+
   const apiKey = Deno.env.get("OPENAI_API_KEY") || "";
   const model = Deno.env.get("OPENAI_MODEL") || DEFAULT_MODEL;
   if (!apiKey) {
@@ -87,6 +114,11 @@ Deno.serve(async (req: Request) => {
 
   if (!inputText) return jsonResponse({ error: "inputText is required." }, 400);
   if (inputText.length > 6000) return jsonResponse({ error: "inputText is too long (max 6000 chars)." }, 400);
+
+  // Server-side NSFW check (mirrors client-side TopicPolicy.isLikelyNSFW)
+  if (isLikelyNSFW(inputText) || isLikelyNSFW(topic)) {
+    return jsonResponse({ error: "That topic isn't allowed." }, 400);
+  }
 
   const prompt = {
     topic,

@@ -1,17 +1,17 @@
 import SwiftUI
 
-enum FeymantecGlass {
-  static let cardRadius: CGFloat = 28
+public enum FeymantecGlass {
+  public static let cardRadius: CGFloat = 28
 }
 
-extension View {
+public extension View {
   @ViewBuilder
   func fey_glassCard(
     tint: Color = .white.opacity(0.10),
     cornerRadius: CGFloat = FeymantecGlass.cardRadius,
     interactive: Bool = false
   ) -> some View {
-    if #available(iOS 26, *) {
+    if #available(iOS 26, macOS 26, visionOS 26, *) {
       self
         .glassEffect(.regular.tint(tint).interactive(interactive), in: .rect(cornerRadius: cornerRadius))
     } else {
@@ -30,7 +30,7 @@ extension View {
     cornerRadius: CGFloat = 999,
     interactive: Bool = false
   ) -> some View {
-    if #available(iOS 26, *) {
+    if #available(iOS 26, macOS 26, visionOS 26, *) {
       self
         // Note: iOS 26 Liquid Glass currently exposes `.regular` (no `.thin`).
         .glassEffect(.regular.tint(tint).interactive(interactive), in: .capsule)
@@ -46,7 +46,7 @@ extension View {
 
   @ViewBuilder
   func fey_primaryButtonStyle() -> some View {
-    if #available(iOS 26, *) {
+    if #available(iOS 26, macOS 26, visionOS 26, *) {
       self.buttonStyle(.glassProminent)
     } else {
       self.buttonStyle(.borderedProminent)
@@ -55,7 +55,7 @@ extension View {
 
   @ViewBuilder
   func fey_secondaryButtonStyle() -> some View {
-    if #available(iOS 26, *) {
+    if #available(iOS 26, macOS 26, visionOS 26, *) {
       self.buttonStyle(.glass)
     } else {
       self.buttonStyle(.bordered)
@@ -64,7 +64,7 @@ extension View {
 
   @ViewBuilder
   func fey_glassEffectID(_ id: String, in namespace: Namespace.ID) -> some View {
-    if #available(iOS 26, *) {
+    if #available(iOS 26, macOS 26, visionOS 26, *) {
       self.glassEffectID(id, in: namespace)
     } else {
       self
@@ -72,17 +72,17 @@ extension View {
   }
 }
 
-struct FeymantecGlassContainer<Content: View>: View {
+public struct FeymantecGlassContainer<Content: View>: View {
   private let spacing: CGFloat
   private let content: Content
 
-  init(spacing: CGFloat = 18, @ViewBuilder content: () -> Content) {
+  public init(spacing: CGFloat = 18, @ViewBuilder content: () -> Content) {
     self.spacing = spacing
     self.content = content()
   }
 
-  var body: some View {
-    if #available(iOS 26, *) {
+  public var body: some View {
+    if #available(iOS 26, macOS 26, visionOS 26, *) {
       GlassEffectContainer(spacing: spacing) {
         content
       }

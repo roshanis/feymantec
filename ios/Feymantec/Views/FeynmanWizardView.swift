@@ -1,19 +1,20 @@
 import SwiftUI
+import UIKit
 import Combine
 import FeymantecCore
 
 struct FeynmanWizardView: View {
-  enum Step: Int {
+  enum Step {
     case pick
     case learn
     case explain
     case card
   }
 
-  enum LearnState {
+  enum AsyncState<T> {
     case idle
     case loading
-    case loaded(introText: String)
+    case loaded(T)
     case failed(message: String)
 
     var isLoading: Bool {
@@ -22,29 +23,32 @@ struct FeynmanWizardView: View {
     }
   }
 
+  struct CritiqueResult {
+    var text: String = ""
+    var suggestions: [String] = []
+    var score: Int? = nil
+  }
+
   @State private var step: Step = .pick
   @State private var concept: String = ""
   @State private var explanation: String = ""
   @State private var remainingSeconds: Int = 5 * 60
   @State private var timerActive: Bool = false
   @State private var lastTick: Date = .now
-  @State private var learnState: LearnState = .idle
+  @State private var learnState: AsyncState<String> = .idle
+  // Intro cache is intentionally in-memory only. Resetting on navigation is acceptable
+  // since the AI call is cheap and the user may change topics frequently.
   @State private var introCache: [String: String] = [:]
-  @State private var critiqueState: LearnState = .idle
-  @State private var critiqueText: String = ""
-  @State private var critiqueSuggestions: [String] = []
-  @State private var critiqueScore: Int? = nil
-  @State private var feynmanState: LearnState = .idle
+  @State private var critique = CritiqueResult()
+  @State private var critiqueState: AsyncState<Void> = .idle
   @State private var feynmanText: String = ""
+  @State private var feynmanState: AsyncState<Void> = .idle
 
+  @Environment(\.scenePhase) private var scenePhase
   @Namespace private var glassNamespace
 
   private var isBlocked: Bool {
     TopicPolicy.isLikelyNSFW(concept)
-  }
-
-  private var card: PreviewCard {
-    PreviewCardBuilder.buildPreviewCard(concept: concept.fey_safeTrim(), v1: explanation)
   }
 
   var body: some View {
@@ -94,6 +98,11 @@ struct FeynmanWizardView: View {
         if remainingSeconds == 0 {
           timerActive = false
         }
+      }
+    }
+    .onChange(of: scenePhase) { _, newPhase in
+      if newPhase == .active && timerActive {
+        lastTick = .now
       }
     }
   }
@@ -174,7 +183,7 @@ struct FeynmanWizardView: View {
 
       HStack(spacing: 12) {
         Button {
-          concept = "TCP congestion control"
+          concept = DailyPrompts.today
         } label: {
           Text("Try a prompt")
         }
@@ -234,12 +243,10 @@ struct FeynmanWizardView: View {
         Spacer(minLength: 0)
 
         Button {
+          critique = CritiqueResult()
           critiqueState = .idle
-          critiqueText = ""
-          critiqueSuggestions = []
-          critiqueScore = nil
-          feynmanState = .idle
           feynmanText = ""
+          feynmanState = .idle
           step = .card
         } label: {
           Text("Make card")
@@ -270,7 +277,7 @@ struct FeynmanWizardView: View {
 
           Spacer(minLength: 0)
 
-          if let score = critiqueScore {
+          if let score = critique.score {
             Text("\(score)")
               .font(.system(size: 15, weight: .bold, design: .rounded))
               .foregroundStyle(.white)
@@ -297,6 +304,11 @@ struct FeynmanWizardView: View {
             step = .explain
           } label: {
             Text("Edit")
+          }
+          .fey_secondaryButtonStyle()
+
+          ShareLink(item: shareText()) {
+            Text("Share")
           }
           .fey_secondaryButtonStyle()
 
@@ -330,6 +342,7 @@ struct FeynmanWizardView: View {
       HStack(spacing: 10) {
         ProgressView()
           .tint(.white)
+          .accessibilityLabel("Loading AI feedback")
         Text("Getting AI feedback…")
           .font(.system(size: 15, weight: .medium, design: .rounded))
           .foregroundStyle(.white.opacity(0.7))
@@ -338,22 +351,22 @@ struct FeynmanWizardView: View {
 
     case .loaded:
       VStack(alignment: .leading, spacing: 14) {
-        if !critiqueText.isEmpty {
-          Text(critiqueText)
+        if !critique.text.isEmpty {
+          Text(critique.text)
             .font(.system(size: 15, weight: .regular, design: .rounded))
             .foregroundStyle(.white.opacity(0.95))
             .fixedSize(horizontal: false, vertical: true)
             .lineSpacing(3)
         }
 
-        if !critiqueSuggestions.isEmpty {
+        if !critique.suggestions.isEmpty {
           VStack(alignment: .leading, spacing: 8) {
             Text("Try next")
               .font(.system(size: 14, weight: .bold, design: .rounded))
               .foregroundStyle(.white.opacity(0.6))
               .textCase(.uppercase)
 
-            ForEach(critiqueSuggestions, id: \.self) { suggestion in
+            ForEach(critique.suggestions, id: \.self) { suggestion in
               HStack(alignment: .top, spacing: 8) {
                 Circle()
                   .fill(.white.opacity(0.4))
@@ -399,6 +412,7 @@ struct FeynmanWizardView: View {
       HStack(spacing: 10) {
         ProgressView()
           .tint(.white)
+          .accessibilityLabel("Loading Feynman explanation")
         Text("Feynman is thinking…")
           .font(.system(size: 15, weight: .medium, design: .rounded))
           .foregroundStyle(.white.opacity(0.7))
@@ -456,13 +470,14 @@ struct FeynmanWizardView: View {
             Spacer()
             ProgressView()
               .tint(.white)
+              .accessibilityLabel("Loading introduction")
             Spacer()
           }
           .frame(minHeight: 120)
 
-        case .loaded(let introText):
+        case .loaded(let text):
           ScrollView {
-            Text(introText)
+            Text(text)
               .font(.system(size: 15, weight: .medium, design: .rounded))
               .foregroundStyle(.white.opacity(0.9))
               .fixedSize(horizontal: false, vertical: true)
@@ -523,14 +538,38 @@ struct FeynmanWizardView: View {
     .fey_glassEffectID("step.learn", in: glassNamespace)
   }
 
+  private func haptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .medium) {
+    UIImpactFeedbackGenerator(style: style).impactOccurred()
+  }
+
   private func startLearn() {
+    haptic()
     step = .learn
     let key = concept.fey_safeTrim().lowercased()
     if let cached = introCache[key] {
-      learnState = .loaded(introText: cached)
+      learnState = .loaded(cached)
     } else {
       fetchIntro()
     }
+  }
+
+  private func userFacingMessage(for error: any Error) -> String {
+    if let urlError = error as? URLError {
+      switch urlError.code {
+      case .timedOut:
+        return "Request timed out. Try again."
+      case .notConnectedToInternet:
+        return "No internet connection."
+      case .badServerResponse:
+        return "Server error. Please try again later."
+      default:
+        break
+      }
+    }
+    if error is DecodingError {
+      return "Unexpected response format."
+    }
+    return "Something went wrong. Try again."
   }
 
   private func fetchIntro() {
@@ -546,9 +585,9 @@ struct FeynmanWizardView: View {
         let response = try await FeymantecAPIClient.shared.callAIExplain(request)
         let text = response.resultText
         introCache[topicText.lowercased()] = text
-        learnState = .loaded(introText: text)
+        learnState = .loaded(text)
       } catch {
-        learnState = .failed(message: "Couldn't load intro. Check your connection and try again.")
+        learnState = .failed(message: userFacingMessage(for: error))
       }
     }
   }
@@ -565,12 +604,15 @@ struct FeynmanWizardView: View {
           mode: "critique"
         )
         let response = try await FeymantecAPIClient.shared.callAIExplain(request)
-        critiqueText = response.resultText
-        critiqueSuggestions = response.suggestions
-        critiqueScore = response.score
-        critiqueState = .loaded(introText: "")
+        critique = CritiqueResult(
+          text: response.resultText,
+          suggestions: response.suggestions,
+          score: response.score
+        )
+        critiqueState = .loaded(())
+        haptic(.light)
       } catch {
-        critiqueState = .failed(message: "Couldn't get AI feedback. Check your connection and try again.")
+        critiqueState = .failed(message: userFacingMessage(for: error))
       }
     }
   }
@@ -579,23 +621,30 @@ struct FeynmanWizardView: View {
     feynmanState = .loading
     let topicText = concept.fey_safeTrim()
     let explanationText = explanation.fey_safeTrim()
+    let conversation: [AIExplainRequest.ConversationTurn] = [
+      .init(role: "user", content: explanationText),
+      .init(role: "assistant", content: critique.text),
+    ]
     Task {
       do {
         let request = AIExplainRequest(
           inputText: explanationText,
           topic: topicText,
-          mode: "feynman"
+          mode: "feynman",
+          conversation: conversation
         )
         let response = try await FeymantecAPIClient.shared.callAIExplain(request)
         feynmanText = response.resultText
-        feynmanState = .loaded(introText: "")
+        feynmanState = .loaded(())
+        haptic(.light)
       } catch {
-        feynmanState = .failed(message: "Couldn't load explanation. Check your connection and try again.")
+        feynmanState = .failed(message: userFacingMessage(for: error))
       }
     }
   }
 
   private func startExplain() {
+    haptic()
     step = .explain
     remainingSeconds = 5 * 60
     explanation = ""
@@ -609,16 +658,26 @@ struct FeynmanWizardView: View {
     return String(format: "%d:%02d", m, s)
   }
 
-  private func shareText(_ card: PreviewCard) -> String {
+  private func shareText() -> String {
     var out: [String] = []
-    out.append("Feymantec: \(card.concept)")
-    out.append("Clarity score: \(card.score)")
-    out.append("")
-    out.append("Gaps:")
-    out.append(contentsOf: card.gaps.map { "- \($0)" })
-    out.append("")
-    out.append("Analogy:")
-    out.append(card.analogy)
+    out.append("Feymantec: \(concept.fey_safeTrim())")
+    if let score = critique.score {
+      out.append("Clarity score: \(score)")
+    }
+    if !critique.text.isEmpty {
+      out.append("")
+      out.append(critique.text)
+    }
+    if !critique.suggestions.isEmpty {
+      out.append("")
+      out.append("Try next:")
+      out.append(contentsOf: critique.suggestions.map { "- \($0)" })
+    }
+    if !feynmanText.isEmpty {
+      out.append("")
+      out.append("Feynman explanation:")
+      out.append(feynmanText)
+    }
     return out.joined(separator: "\n")
   }
 

@@ -16,6 +16,19 @@ node_modules/
 .DS_Store
 Thumbs.db
 
+# Xcode
+**/build/
+**/xcuserdata/
+*.xcuserstate
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
 # Logs
 *.log
 !development.log.md

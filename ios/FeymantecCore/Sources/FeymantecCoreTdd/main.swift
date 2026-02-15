@@ -149,6 +149,17 @@ failures += run("AIExplainResponse_decodesWithNullScore") {
   try expect(resp.model == nil, "expected nil model")
 } ? 0 : 1
 
+failures += run("DailyPrompts_allIsNotEmpty") {
+  try expect(!DailyPrompts.all.isEmpty, "expected daily prompts list to be non-empty")
+  try expect(DailyPrompts.all.count == 15, "expected 15 daily prompts")
+} ? 0 : 1
+
+failures += run("DailyPrompts_todayReturnsValidPrompt") {
+  let prompt = DailyPrompts.today
+  try expect(!prompt.isEmpty, "expected today's prompt to be non-empty")
+  try expect(DailyPrompts.all.contains(prompt), "expected today's prompt to be in the list")
+} ? 0 : 1
+
 if failures > 0 {
   print("\n\(failures) test(s) failed")
   exit(1)

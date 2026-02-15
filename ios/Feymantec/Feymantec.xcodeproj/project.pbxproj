@@ -7,10 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C61A157C2F415A3C00399EA5 /* FeymantecGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61A157A2F415A3C00399EA5 /* FeymantecGlass.swift */; };
 		C61A15812F415A6000399EA5 /* FeynmanWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61A157E2F415A6000399EA5 /* FeynmanWizardView.swift */; };
 		C61A15822F415A6000399EA5 /* FeymantecBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61A157D2F415A6000399EA5 /* FeymantecBackgroundView.swift */; };
-		C61A15832F415A6000399EA5 /* PreviewCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61A157F2F415A6000399EA5 /* PreviewCardView.swift */; };
 		C61A15852F415B0000399EA5 /* FeymantecCore in Frameworks */ = {isa = PBXBuildFile; productRef = C61A15842F415B0000399EA5 /* FeymantecCore */; };
 		F0AA10032F41600000399EA5 /* FeymantecAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0AA10012F41600000399EA5 /* FeymantecAPIClient.swift */; };
 /* End PBXBuildFile section */
@@ -36,10 +34,8 @@
 		C61A153C2F41591600399EA5 /* Feymantec.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Feymantec.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C61A154B2F41591700399EA5 /* FeymantecTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FeymantecTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C61A15552F41591700399EA5 /* FeymantecUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FeymantecUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C61A157A2F415A3C00399EA5 /* FeymantecGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeymantecGlass.swift; sourceTree = "<group>"; };
 		C61A157D2F415A6000399EA5 /* FeymantecBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeymantecBackgroundView.swift; sourceTree = "<group>"; };
 		C61A157E2F415A6000399EA5 /* FeynmanWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeynmanWizardView.swift; sourceTree = "<group>"; };
-		C61A157F2F415A6000399EA5 /* PreviewCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewCardView.swift; sourceTree = "<group>"; };
 		F0AA10012F41600000399EA5 /* FeymantecAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeymantecAPIClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -94,7 +90,6 @@
 				C61A154E2F41591700399EA5 /* FeymantecTests */,
 				C61A15582F41591700399EA5 /* FeymantecUITests */,
 				C61A153D2F41591600399EA5 /* Products */,
-				C61A157B2F415A3C00399EA5 /* Design */,
 				F0AA10022F41600000399EA5 /* Network */,
 				C61A15802F415A6000399EA5 /* Views */,
 			);
@@ -110,20 +105,11 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C61A157B2F415A3C00399EA5 /* Design */ = {
-			isa = PBXGroup;
-			children = (
-				C61A157A2F415A3C00399EA5 /* FeymantecGlass.swift */,
-			);
-			path = Design;
-			sourceTree = "<group>";
-		};
 		C61A15802F415A6000399EA5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				C61A157D2F415A6000399EA5 /* FeymantecBackgroundView.swift */,
 				C61A157E2F415A6000399EA5 /* FeynmanWizardView.swift */,
-				C61A157F2F415A6000399EA5 /* PreviewCardView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -284,10 +270,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C61A157C2F415A3C00399EA5 /* FeymantecGlass.swift in Sources */,
 				C61A15812F415A6000399EA5 /* FeynmanWizardView.swift in Sources */,
 				C61A15822F415A6000399EA5 /* FeymantecBackgroundView.swift in Sources */,
-				C61A15832F415A6000399EA5 /* PreviewCardView.swift in Sources */,
 				F0AA10032F41600000399EA5 /* FeymantecAPIClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

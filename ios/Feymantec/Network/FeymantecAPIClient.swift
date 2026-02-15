@@ -5,6 +5,8 @@ actor FeymantecAPIClient {
   static let shared = FeymantecAPIClient()
 
   private let baseURL = "https://narcpnqenogakxvkeiuh.supabase.co/functions/v1"
+  // Publishable Supabase anon key — safe to embed in client code.
+  // It only grants access to public edge functions; row-level security handles the rest.
   private let anonKey = "sb_publishable_lDimobFTWN3QVRPkgWSJyQ_ch45ioL7"
 
   private init() {}
@@ -19,6 +21,7 @@ actor FeymantecAPIClient {
     urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
     urlRequest.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
     urlRequest.setValue(anonKey, forHTTPHeaderField: "apikey")
+    urlRequest.timeoutInterval = 30
     urlRequest.httpBody = try JSONEncoder().encode(request)
 
     let (data, response) = try await URLSession.shared.data(for: urlRequest)

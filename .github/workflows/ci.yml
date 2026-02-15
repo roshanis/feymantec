@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-core:
+    name: Build & Test FeymantecCore
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios/FeymantecCore
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build FeymantecCore
+        run: swift build
+
+      - name: Run TDD tests
+        run: swift run FeymantecCoreTdd
