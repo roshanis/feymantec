@@ -68,11 +68,18 @@ struct FeynmanWizardView: View {
             .padding(.top, 18)
             .padding(.bottom, 10)
 
-          cardStep
-            .frame(maxWidth: 560)
+          GeometryReader { proxy in
+            VStack(spacing: 0) {
+              cardStep
+                .frame(maxWidth: 560)
+            }
             .padding(.horizontal, 18)
             .padding(.bottom, 18)
+            // Give the ScrollView a concrete height so it can scroll.
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+          }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       } else {
         VStack(spacing: 18) {
           header
@@ -90,7 +97,7 @@ struct FeynmanWizardView: View {
         .animation(.spring(response: 0.45, dampingFraction: 0.90), value: step)
       }
     }
-    .onChange(of: step) { _, next in
+    .onChange(of: step) { next in
       if next != .explain {
         timerActive = false
       }
@@ -119,7 +126,7 @@ struct FeynmanWizardView: View {
         }
       }
     }
-    .onChange(of: scenePhase) { _, newPhase in
+    .onChange(of: scenePhase) { newPhase in
       if newPhase == .active && timerActive {
         lastTick = .now
       }
