@@ -130,7 +130,7 @@ struct FeynmanWizardView: View {
         .foregroundStyle(.white)
         .fixedSize(horizontal: false, vertical: true)
 
-      Text("Pick a concept. Teach it simply. We'll show the gaps.")
+      Text("Pick a concept. Teach it simply. We’ll show the gaps.")
         .font(.system(size: 14, weight: .medium, design: .rounded))
         .foregroundStyle(.white.opacity(0.75))
 
@@ -145,7 +145,7 @@ struct FeynmanWizardView: View {
           .fey_glassChip(interactive: true)
 
         if isBlocked {
-          Text("That topic isn't allowed. Try a different concept.")
+          Text("That topic isn’t allowed. Try a different concept.")
             .font(.system(size: 12, weight: .semibold, design: .rounded))
             .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.35))
         }
@@ -190,7 +190,7 @@ struct FeynmanWizardView: View {
         .font(.system(size: 22, weight: .bold, design: .rounded))
         .foregroundStyle(.white)
 
-      Text("Explain like you're teaching a smart 12-year-old. Use 1 example if you can.")
+      Text("Explain like you’re teaching a smart 12-year-old. Use 1 example if you can.")
         .font(.system(size: 13, weight: .medium, design: .rounded))
         .foregroundStyle(.white.opacity(0.75))
 

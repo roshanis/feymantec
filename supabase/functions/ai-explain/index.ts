@@ -7,7 +7,7 @@ const CORS_HEADERS = {
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const DEFAULT_MODEL = "gpt-5.2";
 
-type ExplainMode = "simplify" | "critique" | "daily5";
+type ExplainMode = "simplify" | "critique" | "daily5" | "intro";
 
 type RequestPayload = {
   inputText?: string;
@@ -28,11 +28,14 @@ function jsonResponse(body: unknown, status = 200): Response {
 
 function normalizeMode(raw: string): ExplainMode {
   const mode = String(raw || "").trim().toLowerCase();
-  if (mode === "critique" || mode === "daily5") return mode;
+  if (mode === "critique" || mode === "daily5" || mode === "intro") return mode;
   return "simplify";
 }
 
 function buildTaskInstruction(mode: ExplainMode): string {
+  if (mode === "intro") {
+    return "Give a 2-3 paragraph beginner-friendly introduction to the topic. Cover what it is, why it matters, and one concrete example. Use language a smart 12-year-old could follow. Do NOT explain everything — leave gaps for the learner to discover when they try to teach it back. Keep resultText under 200 words.";
+  }
   if (mode === "critique") {
     return "Give focused critique: point out ambiguity, missing steps, and jargon. Then provide a cleaner rewrite.";
   }

@@ -93,6 +93,62 @@ failures += run("smoke_buildPreviewCard_doesNotCrashOnEmptyStrings") {
   try expect(card.simple.count == 5, "expected padded simple")
 } ? 0 : 1
 
+failures += run("AIExplainRequest_encodesCorrectly") {
+  let req = AIExplainRequest(
+    inputText: "Photosynthesis converts light",
+    topic: "Photosynthesis",
+    mode: "intro",
+    conversation: [
+      AIExplainRequest.ConversationTurn(role: "user", content: "hello")
+    ]
+  )
+  let data = try JSONEncoder().encode(req)
+  let dict = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+  try expect(dict["inputText"] as? String == "Photosynthesis converts light", "expected inputText")
+  try expect(dict["topic"] as? String == "Photosynthesis", "expected topic")
+  try expect(dict["mode"] as? String == "intro", "expected mode")
+
+  let conv = dict["conversation"] as? [[String: Any]] ?? []
+  try expect(conv.count == 1, "expected 1 conversation turn")
+  try expect(conv[0]["role"] as? String == "user", "expected role")
+  try expect(conv[0]["content"] as? String == "hello", "expected content")
+} ? 0 : 1
+
+failures += run("AIExplainResponse_decodesFromServerJSON") {
+  let json = """
+  {
+    "resultText": "Here is an intro.",
+    "suggestions": ["Try an example", "Add a diagram"],
+    "score": 42,
+    "model": "gpt-5.2"
+  }
+  """.data(using: .utf8)!
+
+  let resp = try JSONDecoder().decode(AIExplainResponse.self, from: json)
+  try expect(resp.resultText == "Here is an intro.", "expected resultText")
+  try expect(resp.suggestions == ["Try an example", "Add a diagram"], "expected suggestions")
+  try expect(resp.score == 42, "expected score")
+  try expect(resp.model == "gpt-5.2", "expected model")
+} ? 0 : 1
+
+failures += run("AIExplainResponse_decodesWithNullScore") {
+  let json = """
+  {
+    "resultText": "No score here.",
+    "suggestions": [],
+    "score": null,
+    "model": null
+  }
+  """.data(using: .utf8)!
+
+  let resp = try JSONDecoder().decode(AIExplainResponse.self, from: json)
+  try expect(resp.resultText == "No score here.", "expected resultText")
+  try expect(resp.suggestions.isEmpty, "expected empty suggestions")
+  try expect(resp.score == nil, "expected nil score")
+  try expect(resp.model == nil, "expected nil model")
+} ? 0 : 1
+
 if failures > 0 {
   print("\n\(failures) test(s) failed")
   exit(1)
