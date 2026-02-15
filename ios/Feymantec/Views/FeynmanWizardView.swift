@@ -75,14 +75,14 @@ struct FeynmanWizardView: View {
             .padding(.bottom, 10)
 
           GeometryReader { proxy in
-            VStack(spacing: 0) {
-              cardStep
-                .frame(maxWidth: 560)
-            }
-            .padding(.horizontal, 18)
-            .padding(.bottom, 18)
-            // Give the ScrollView a concrete height so it can scroll.
-            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+            // Constrain the ScrollView itself (not just its container).
+            // Otherwise it may size-to-fit content and become non-scrollable when clipped.
+            cardStep
+              .frame(maxWidth: 560)
+              .frame(height: max(0, proxy.size.height - 18))
+              .padding(.horizontal, 18)
+              .padding(.bottom, 18)
+              .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
           }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
