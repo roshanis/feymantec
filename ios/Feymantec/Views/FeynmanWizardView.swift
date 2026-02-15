@@ -43,6 +43,12 @@ struct FeynmanWizardView: View {
   @State private var critiqueState: AsyncState<Void> = .idle
   @State private var feynmanText: String = ""
   @State private var feynmanState: AsyncState<Void> = .idle
+  @State private var introTask: Task<Void, Never>? = nil
+  @State private var critiqueTask: Task<Void, Never>? = nil
+  @State private var feynmanTask: Task<Void, Never>? = nil
+  @State private var introToken: Int = 0
+  @State private var critiqueToken: Int = 0
+  @State private var feynmanToken: Int = 0
 
   @Environment(\.scenePhase) private var scenePhase
   @Namespace private var glassNamespace
@@ -87,6 +93,19 @@ struct FeynmanWizardView: View {
     .onChange(of: step) { _, next in
       if next != .explain {
         timerActive = false
+      }
+      if next != .learn {
+        introToken += 1
+        introTask?.cancel()
+        introTask = nil
+      }
+      if next != .card {
+        critiqueToken += 1
+        feynmanToken += 1
+        critiqueTask?.cancel()
+        critiqueTask = nil
+        feynmanTask?.cancel()
+        feynmanTask = nil
       }
     }
     .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { now in
@@ -288,6 +307,8 @@ struct FeynmanWizardView: View {
           }
         }
 
+        localCardSection
+
         aiFeedbackSection
 
         feynmanSection
@@ -333,6 +354,81 @@ struct FeynmanWizardView: View {
         fetchCritique()
       }
     }
+  }
+
+  private var localCardSection: some View {
+    let card = PreviewCardBuilder.buildPreviewCard(concept: concept.fey_safeTrim(), v1: explanation)
+
+    return VStack(alignment: .leading, spacing: 12) {
+      HStack(alignment: .firstTextBaseline) {
+        Text("Instant card")
+          .font(.system(size: 14, weight: .bold, design: .rounded))
+          .foregroundStyle(.white.opacity(0.6))
+          .textCase(.uppercase)
+
+        Spacer(minLength: 0)
+
+        Text("Local \(card.score)")
+          .font(.system(size: 13, weight: .bold, design: .rounded))
+          .foregroundStyle(.white.opacity(0.9))
+          .padding(.vertical, 7)
+          .padding(.horizontal, 10)
+          .background(.white.opacity(0.12), in: Capsule())
+          .accessibilityLabel("Local score")
+      }
+
+      if !card.gaps.isEmpty {
+        VStack(alignment: .leading, spacing: 8) {
+          Text("Gaps")
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.8))
+
+          ForEach(card.gaps, id: \.self) { gap in
+            HStack(alignment: .top, spacing: 8) {
+              Circle()
+                .fill(.white.opacity(0.4))
+                .frame(width: 6, height: 6)
+                .padding(.top, 6)
+              Text(gap)
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.9))
+                .fixedSize(horizontal: false, vertical: true)
+                .lineSpacing(2)
+            }
+          }
+        }
+      }
+
+      if !card.analogy.isEmpty {
+        VStack(alignment: .leading, spacing: 6) {
+          Text("Analogy")
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.8))
+          Text(card.analogy)
+            .font(.system(size: 14, weight: .regular, design: .rounded))
+            .foregroundStyle(.white.opacity(0.9))
+            .fixedSize(horizontal: false, vertical: true)
+            .lineSpacing(2)
+        }
+      }
+
+      if !card.quiz.isEmpty {
+        VStack(alignment: .leading, spacing: 8) {
+          Text("Quick check")
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.8))
+
+          ForEach(card.quiz, id: \.q) { item in
+            Text("Q: \(item.q)")
+              .font(.system(size: 14, weight: .medium, design: .rounded))
+              .foregroundStyle(.white.opacity(0.9))
+              .fixedSize(horizontal: false, vertical: true)
+          }
+        }
+      }
+    }
+    .padding(14)
+    .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
   }
 
   @ViewBuilder
@@ -554,6 +650,14 @@ struct FeynmanWizardView: View {
   }
 
   private func userFacingMessage(for error: any Error) -> String {
+    if let cfgError = error as? FeymantecConfigError {
+      switch cfgError {
+      case .missingKey:
+        return "App configuration missing. Please reinstall or update."
+      case .invalidURL, .invalidAnonKey:
+        return "App configuration invalid. Please reinstall or update."
+      }
+    }
     if let urlError = error as? URLError {
       switch urlError.code {
       case .timedOut:
@@ -573,9 +677,12 @@ struct FeynmanWizardView: View {
   }
 
   private func fetchIntro() {
+    introToken += 1
+    let token = introToken
+    introTask?.cancel()
     learnState = .loading
     let topicText = concept.fey_safeTrim()
-    Task {
+    introTask = Task {
       do {
         let request = AIExplainRequest(
           inputText: topicText,
@@ -583,20 +690,27 @@ struct FeynmanWizardView: View {
           mode: "intro"
         )
         let response = try await FeymantecAPIClient.shared.callAIExplain(request)
+        try Task.checkCancellation()
+        if token != introToken { return }
         let text = response.resultText
         introCache[topicText.lowercased()] = text
         learnState = .loaded(text)
       } catch {
+        if error is CancellationError { return }
+        if token != introToken { return }
         learnState = .failed(message: userFacingMessage(for: error))
       }
     }
   }
 
   private func fetchCritique() {
+    critiqueToken += 1
+    let token = critiqueToken
+    critiqueTask?.cancel()
     critiqueState = .loading
     let topicText = concept.fey_safeTrim()
     let explanationText = explanation.fey_safeTrim()
-    Task {
+    critiqueTask = Task {
       do {
         let request = AIExplainRequest(
           inputText: explanationText,
@@ -604,6 +718,8 @@ struct FeynmanWizardView: View {
           mode: "critique"
         )
         let response = try await FeymantecAPIClient.shared.callAIExplain(request)
+        try Task.checkCancellation()
+        if token != critiqueToken { return }
         critique = CritiqueResult(
           text: response.resultText,
           suggestions: response.suggestions,
@@ -612,12 +728,17 @@ struct FeynmanWizardView: View {
         critiqueState = .loaded(())
         haptic(.light)
       } catch {
+        if error is CancellationError { return }
+        if token != critiqueToken { return }
         critiqueState = .failed(message: userFacingMessage(for: error))
       }
     }
   }
 
   private func fetchFeynman() {
+    feynmanToken += 1
+    let token = feynmanToken
+    feynmanTask?.cancel()
     feynmanState = .loading
     let topicText = concept.fey_safeTrim()
     let explanationText = explanation.fey_safeTrim()
@@ -625,7 +746,7 @@ struct FeynmanWizardView: View {
       .init(role: "user", content: explanationText),
       .init(role: "assistant", content: critique.text),
     ]
-    Task {
+    feynmanTask = Task {
       do {
         let request = AIExplainRequest(
           inputText: explanationText,
@@ -634,10 +755,14 @@ struct FeynmanWizardView: View {
           conversation: conversation
         )
         let response = try await FeymantecAPIClient.shared.callAIExplain(request)
+        try Task.checkCancellation()
+        if token != feynmanToken { return }
         feynmanText = response.resultText
         feynmanState = .loaded(())
         haptic(.light)
       } catch {
+        if error is CancellationError { return }
+        if token != feynmanToken { return }
         feynmanState = .failed(message: userFacingMessage(for: error))
       }
     }

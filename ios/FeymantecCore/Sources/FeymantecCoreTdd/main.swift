@@ -160,6 +160,56 @@ failures += run("DailyPrompts_todayReturnsValidPrompt") {
   try expect(DailyPrompts.all.contains(prompt), "expected today's prompt to be in the list")
 } ? 0 : 1
 
+failures += run("FeymantecBackendConfig_fromInfoDictionary_parsesValues") {
+  let info: [String: Any] = [
+    "FEYMANTEC_SUPABASE_FUNCTIONS_BASE_URL": "https://example.supabase.co/functions/v1",
+    "FEYMANTEC_SUPABASE_ANON_KEY": "sb_publishable_test_123",
+  ]
+
+  let cfg = try FeymantecBackendConfig.fromInfoDictionary(info)
+  try expect(
+    cfg.functionsBaseURL.absoluteString == "https://example.supabase.co/functions/v1",
+    "expected functions base url to parse"
+  )
+  try expect(cfg.anonKey == "sb_publishable_test_123", "expected anon key to parse")
+} ? 0 : 1
+
+failures += run("FeymantecBackendConfig_fromInfoDictionary_missingKeysThrows") {
+  let info: [String: Any] = [:]
+  do {
+    _ = try FeymantecBackendConfig.fromInfoDictionary(info)
+    throw TestFailure(message: "expected missing keys to throw")
+  } catch is FeymantecConfigError {
+    // ok
+  }
+} ? 0 : 1
+
+failures += run("FeymantecBackendConfig_fromInfoDictionary_invalidURLThrows") {
+  let info: [String: Any] = [
+    "FEYMANTEC_SUPABASE_FUNCTIONS_BASE_URL": "not a url",
+    "FEYMANTEC_SUPABASE_ANON_KEY": "sb_publishable_test_123",
+  ]
+  do {
+    _ = try FeymantecBackendConfig.fromInfoDictionary(info)
+    throw TestFailure(message: "expected invalid url to throw")
+  } catch is FeymantecConfigError {
+    // ok
+  }
+} ? 0 : 1
+
+failures += run("FeymantecBackendConfig_fromInfoDictionary_secretKeyThrows") {
+  let info: [String: Any] = [
+    "FEYMANTEC_SUPABASE_FUNCTIONS_BASE_URL": "https://example.supabase.co/functions/v1",
+    "FEYMANTEC_SUPABASE_ANON_KEY": "sb_secret_do_not_ship",
+  ]
+  do {
+    _ = try FeymantecBackendConfig.fromInfoDictionary(info)
+    throw TestFailure(message: "expected sb_secret_ to throw")
+  } catch is FeymantecConfigError {
+    // ok
+  }
+} ? 0 : 1
+
 if failures > 0 {
   print("\n\(failures) test(s) failed")
   exit(1)

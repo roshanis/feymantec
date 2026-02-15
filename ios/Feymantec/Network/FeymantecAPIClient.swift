@@ -4,23 +4,28 @@ import FeymantecCore
 actor FeymantecAPIClient {
   static let shared = FeymantecAPIClient()
 
-  private let baseURL = "https://narcpnqenogakxvkeiuh.supabase.co/functions/v1"
-  // Publishable Supabase anon key — safe to embed in client code.
-  // It only grants access to public edge functions; row-level security handles the rest.
-  private let anonKey = "sb_publishable_lDimobFTWN3QVRPkgWSJyQ_ch45ioL7"
+  private var cachedConfig: FeymantecBackendConfig?
 
   private init() {}
 
+  private func config() throws -> FeymantecBackendConfig {
+    if let cachedConfig { return cachedConfig }
+
+    let info = Bundle.main.infoDictionary ?? [:]
+    let cfg = try FeymantecBackendConfig.fromInfoDictionary(info)
+    cachedConfig = cfg
+    return cfg
+  }
+
   func callAIExplain(_ request: AIExplainRequest) async throws -> AIExplainResponse {
-    guard let url = URL(string: "\(baseURL)/ai-explain") else {
-      throw URLError(.badURL)
-    }
+    let cfg = try config()
+    let url = cfg.functionsBaseURL.appendingPathComponent("ai-explain")
 
     var urlRequest = URLRequest(url: url)
     urlRequest.httpMethod = "POST"
     urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    urlRequest.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
-    urlRequest.setValue(anonKey, forHTTPHeaderField: "apikey")
+    urlRequest.setValue("Bearer \(cfg.anonKey)", forHTTPHeaderField: "Authorization")
+    urlRequest.setValue(cfg.anonKey, forHTTPHeaderField: "apikey")
     urlRequest.timeoutInterval = 30
     urlRequest.httpBody = try JSONEncoder().encode(request)
 

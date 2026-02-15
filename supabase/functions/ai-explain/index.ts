@@ -130,29 +130,41 @@ Deno.serve(async (req: Request) => {
       .map((turn) => ({ role: String(turn?.role || ""), content: String(turn?.content || "") })),
   };
 
-  const openAiRes = await fetch(OPENAI_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.3,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are Feymantec coach. Always return strict JSON with keys: resultText (string), suggestions (array of strings), score (number 0-100). Keep resultText concise.",
-        },
-        {
-          role: "user",
-          content: JSON.stringify(prompt),
-        },
-      ],
-    }),
-  });
+  let openAiRes: Response;
+  try {
+    openAiRes = await fetch(OPENAI_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are Feymantec coach. Always return strict JSON with keys: resultText (string), suggestions (array of strings), score (number 0-100). Keep resultText concise.",
+          },
+          {
+            role: "user",
+            content: JSON.stringify(prompt),
+          },
+        ],
+      }),
+    });
+  } catch (err) {
+    return jsonResponse(
+      {
+        error: "OpenAI request failed.",
+        providerStatus: null,
+        providerError: String(err),
+      },
+      502
+    );
+  }
 
   const openAiJson = await openAiRes.json().catch(() => null);
   if (!openAiRes.ok) {
