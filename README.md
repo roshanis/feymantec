@@ -1,70 +1,88 @@
-# Feymantec (Web)
+# Feymantec Web
 
-Landing page + waitlist + shareable "Feynman Card" demo for the iOS app.
+Feymantec Web is the landing, onboarding, waitlist, and share-card surface for the Feymantec learning product. The current repo ships as a lightweight static web app with optional Supabase-backed waitlist flows and a server-side AI explanation function.
 
-## Recommended Stack (When You Move Beyond Static)
+## What this repo includes
 
-- Web: Next.js (App Router) + TypeScript + Tailwind (or CSS Modules if you prefer)
-- Backend: Supabase (Postgres + Auth + Edge Functions)
-- AI: Supabase Edge Function calling your LLM provider (keeps keys off the client)
-- Deploy: Vercel (web) + Supabase (db/functions)
-- Analytics: PostHog (optional, later)
+- Marketing landing page
+- Waitlist and referral flow
+- Login and onboarding screens
+- Shareable Feynman Card experience
+- Optional Supabase-backed AI explanation endpoint
 
-This repo currently ships a dependency-free static site because package installs are unavailable in this environment.
+## Current product shape
 
-## Local Dev
+This repo is best understood as the public web companion to the Feymantec app, not as the full product itself. Its job is to explain the value proposition, capture interest, and let users share learning artifacts.
 
-Open `index.html` directly in a browser, or run a tiny static server:
+## Local development
+
+### Quick preview
+
+Open `index.html` directly in a browser, or run a static server:
 
 ```bash
 python3 -m http.server 5173
 ```
 
-Then visit `http://localhost:5173`.
+Open `http://localhost:5173`.
 
-## Supabase Setup (Waitlist + Referrals)
+### Project scripts
 
-1. Create a Supabase project.
-2. In the SQL editor, run:
-   - `supabase/migrations/0001_waitlist.sql`
-   - `supabase/migrations/0002_waitlist_auth.sql`
-   - `supabase/migrations/0003_waitlist_referral_count.sql`
-3. Edit `config.js` and fill in:
-   - `supabaseUrl`
-   - `supabaseAnonKey`
+```bash
+npm test
+npm run test:e2e
+npm run lint
+npm run serve
+```
 
-The waitlist form uses passwordless email OTP (send code, then verify) and inserts rows into `public.waitlist_signups`.
+## Configuration
 
-## OpenAI AI Integration (Supabase Edge Function)
+### Waitlist and auth
 
-This repo now includes a server-side OpenAI proxy at `supabase/functions/ai-explain/index.ts`.
+Copy and fill the client config:
 
-Why: keep your OpenAI key off the client while letting `app.js` call AI safely through Supabase.
+```bash
+cp config.example.js config.js
+```
 
-### 1) Deploy the Edge Function
+Set:
+
+- `supabaseUrl`
+- `supabaseAnonKey`
+
+### Supabase setup
+
+Run these migrations in order:
+
+- `supabase/migrations/0001_waitlist.sql`
+- `supabase/migrations/0002_waitlist_auth.sql`
+- `supabase/migrations/0003_waitlist_referral_count.sql`
+
+### AI explanation endpoint
+
+This repo includes a Supabase Edge Function at `supabase/functions/ai-explain/index.ts`.
+
+Deploy it with:
 
 ```bash
 supabase functions deploy ai-explain
-```
-
-### 2) Set function secrets
-
-```bash
-supabase secrets set OPENAI_API_KEY=your_key_here
+supabase secrets set OPENAI_API_KEY=replace-me
 supabase secrets set OPENAI_MODEL=gpt-5.2
 ```
 
-`OPENAI_MODEL` is optional; it defaults to `gpt-5.2`.
+## Important files
 
-### 3) Client config
+- `index.html`: main landing page
+- `create.html`: card creation flow
+- `share/index.html`: shared-card rendering and export
+- `app.js`: landing page behavior
+- `lib/`: client-side helpers and feature modules
+- `tests/`: Vitest coverage for core browser logic
 
-In `config.js`, keep using only public values and optionally set:
+## Status
 
-- `aiFunctionName` (defaults to `ai-explain`)
+Current status: active web surface for the Feymantec concept, with real tests and a staged path toward a fuller application stack.
 
-The browser helper is available as `window.FeymantecAI` from `lib/feymantec-ai.js`.
+## License
 
-## Pages
-
-- `index.html`: landing + demo + waitlist
-- `share/index.html`: renders a shared Card from a URL hash and supports PNG export
+MIT
